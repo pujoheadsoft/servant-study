@@ -21,7 +21,10 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
-- servant
+- aeson
+- servant-server
+- wai
+- warp
 
 ghc-options:
 - -Wall
@@ -46,6 +49,7 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
+    - base
     - servant-study
 
 tests:
@@ -57,5 +61,9 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
+    - base
     - servant-study
-    - mockcat
+    - hspec
+    - hspec-wai
+    - hspec-wai-json
+    - aeson

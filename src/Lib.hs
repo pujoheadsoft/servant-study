@@ -13,8 +13,13 @@ import Network.Wai.Handler.Warp
 import Servant
 
 {-
-  ユーザー情報
-  
+  仕様
+  ユーザー情報を登録する
+  入力はJsonで受け取る
+  出力はusersテーブルとuser_notificationsテーブルへの書き込み
+  テーブルへの書き込みが失敗したらロールバックする
+  メールアドレスをチェックするドメインロジックがある
+  ログ出力を行う
 -}
 
 data User = User

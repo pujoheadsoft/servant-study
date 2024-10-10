@@ -6,23 +6,14 @@ public class ExecutionHooks {
   private Database database;
 
   @BeforeSuite
-  public void setup() {
+  public void setup() throws Exception {
     database = new Database();
-    try {
-      database.init();
-      database.truncateTables();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    database.init();
   }
 
   @BeforeScenario
-  public void clearData() {
-    try {
-      database.truncateTables();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+  public void clearData() throws Exception {
+    database.truncateTables();
   }
   
 }

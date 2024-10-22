@@ -7,12 +7,15 @@ public class ExecutionHooks {
 
   @BeforeSuite
   public void setup() throws Exception {
+    System.err.println("BeforeSuite");
     database = new Database();
     database.init();
   }
 
   @BeforeScenario
   public void clearData() throws Exception {
+    System.err.println("BeforeScenario");
+    System.err.println(database);
     database.truncateTables();
   }
   

@@ -1,47 +1,34 @@
-import com.thoughtworks.gauge.Step;
-import com.thoughtworks.gauge.Table;
-import com.thoughtworks.gauge.TableRow;
-
-import java.util.HashSet;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
+
+import com.thoughtworks.gauge.Step;
+import com.thoughtworks.gauge.datastore.ScenarioDataStore;
 
 public class StepImplementation {
 
-    private HashSet<Character> vowels;
+  @Step("パス<path>にJSON<json>でPUTリクエストを送信する")
+  public void sendPutRequest(String path, String json) throws Exception {
+    HttpClient client = HttpClient.newHttpClient();
+    HttpRequest request = HttpRequest.newBuilder()
+        .uri(new URI("http://localhost:8080" + path))
+        .header("Content-Type", "application/json")
+        .PUT(BodyPublishers.ofString(json))
+        .build();
 
-    @Step("Vowels in English language are <vowelString>.")
-    public void setLanguageVowels(String vowelString) {
-        vowels = new HashSet<>();
-        for (char ch : vowelString.toCharArray()) {
-            vowels.add(ch);
-        }
-    }
+    HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
 
-    @Step("The word <word> has <expectedCount> vowels.")
-    public void verifyVowelsCountInWord(String word, int expectedCount) {
-        int actualCount = countVowels(word);
-        assertThat(expectedCount).isEqualTo(actualCount);
-    }
+    ScenarioDataStore.put("STATUS_CODE", response.statusCode());
+  }
 
-    @Step("Almost all words have vowels <wordsTable>")
-    public void verifyVowelsCountInMultipleWords(Table wordsTable) {
-        for (TableRow row : wordsTable.getTableRows()) {
-            String word = row.getCell("Word");
-            int expectedCount = Integer.parseInt(row.getCell("Vowel Count"));
-            int actualCount = countVowels(word);
-
-            assertThat(expectedCount).isEqualTo(actualCount);
-        }
-    }
-
-    private int countVowels(String word) {
-        int count = 0;
-        for (char ch : word.toCharArray()) {
-            if (vowels.contains(ch)) {
-                count++;
-            }
-        }
-        return count;
-    }
+  @Step("レスポンスのステータスコードが<status_code>であること")
+  public void verifyStatusCode(int statusCode) {
+    int actualStatusCode = (int) ScenarioDataStore.get("STATUS_CODE");
+    assertThat(actualStatusCode).isEqualTo(statusCode);
+  }
 }

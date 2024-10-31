@@ -26,9 +26,14 @@ public class StepImplementation {
     ScenarioDataStore.put("STATUS_CODE", response.statusCode());
   }
 
-  @Step("レスポンスのステータスコードが<status_code>であること")
+  @Step("レスポンスのステータスコードが<status_code>である")
   public void verifyStatusCode(int statusCode) {
     int actualStatusCode = (int) ScenarioDataStore.get("STATUS_CODE");
     assertThat(actualStatusCode).isEqualTo(statusCode);
+  }
+
+  @Step("<tableName>テーブルの内容が<path>にあるCSVファイルの内容と一致する")
+  public void verifyTableData(String tableName, String path) throws Exception {
+    Database.getInstance().assertTable(tableName, path);
   }
 }

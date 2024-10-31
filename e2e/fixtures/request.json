@@ -1,1 +1,11 @@
-{}
+{
+  "name": {
+    "first": "John",
+    "last": "Doe"
+  },
+  "email": "john.doe@anonymouse.com",
+  "notifications": {
+    "email": true,
+    "push": false
+  }
+}

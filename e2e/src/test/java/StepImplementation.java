@@ -12,6 +12,19 @@ import com.thoughtworks.gauge.datastore.ScenarioDataStore;
 
 public class StepImplementation {
 
+  @Step("パス<path>にGETリクエストを送信する")
+  public void sendGetRequest(String path) throws Exception {
+    HttpClient client = HttpClient.newHttpClient();
+    HttpRequest request = HttpRequest.newBuilder()
+        .uri(new URI("http://localhost:8080" + path))
+        .build();
+
+    HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+
+    ScenarioDataStore.put("STATUS_CODE", response.statusCode());
+    ScenarioDataStore.put("RESPONSE_BODY", response.body());
+  }
+
   @Step("パス<path>にJSON<json>でPUTリクエストを送信する")
   public void sendPutRequest(String path, String json) throws Exception {
     HttpClient client = HttpClient.newHttpClient();
@@ -24,12 +37,19 @@ public class StepImplementation {
     HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
 
     ScenarioDataStore.put("STATUS_CODE", response.statusCode());
+    ScenarioDataStore.put("RESPONSE_BODY", response.body());
   }
 
   @Step("レスポンスのステータスコードが<status_code>である")
   public void verifyStatusCode(int statusCode) {
     int actualStatusCode = (int) ScenarioDataStore.get("STATUS_CODE");
     assertThat(actualStatusCode).isEqualTo(statusCode);
+  }
+
+  @Step("レスポンスボディが<expected_body>である")
+  public void verifyResponseBody(String expectedBody) {
+    String actualBody = (String) ScenarioDataStore.get("RESPONSE_BODY");
+    assertThat(actualBody).isEqualTo(expectedBody);
   }
 
   @Step("<tableName>テーブルの内容が<path>にあるCSVファイルの内容と一致する")

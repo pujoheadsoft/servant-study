@@ -34,11 +34,13 @@ data User = User
 
 $(deriveJSON defaultOptions ''User)
 
-type API = "v1" :> "systems" :> "ping" :> Get '[PlainText] String
-      :<|> "v1" :> "users" :> Get '[JSON] [User]
-      :<|> "v1" :> "simple" :> "users" :> Capture "userId" Integer
-                                       :> ReqBody '[JSON] UserRequest
-                                       :> Put '[PlainText] String
+type API = "v1" :> 
+  (    "systems" :> "ping" :> Get '[PlainText] String
+  :<|> "users" :> Get '[JSON] [User]
+  :<|> "simple" :> "users" :> Capture "userId" Integer
+                           :> ReqBody '[JSON] UserRequest
+                           :> Put '[PlainText] String
+  )
 
 startApp :: IO ()
 startApp = run 8080 app

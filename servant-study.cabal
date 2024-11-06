@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      Driver.Entity.User
       Lib
   other-modules:
       Paths_servant_study
@@ -36,6 +37,8 @@ library
   build-depends:
       aeson
     , base >=4.7 && <5
+    , beam-core
+    , beam-postgres
     , servant-server
     , wai
     , warp
@@ -53,6 +56,8 @@ executable servant-study-exe
   build-depends:
       aeson
     , base
+    , beam-core
+    , beam-postgres
     , servant-server
     , servant-study
     , wai
@@ -72,6 +77,8 @@ test-suite servant-study-test
   build-depends:
       aeson
     , base
+    , beam-core
+    , beam-postgres
     , hspec
     , hspec-wai
     , hspec-wai-json

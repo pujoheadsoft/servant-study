@@ -11,6 +11,20 @@ packages:
       size: 1647
   original:
     hackage: mockcat-0.5.1.0
+- completed:
+    hackage: beam-postgres-0.5.3.1@sha256:97e447ff1b9735bf106649e95af930dba9be0f0fa6e420d4ce44b92c6997c385,4516
+    pantry-tree:
+      sha256: facf71db9b461930b9cf08698254e6ca0332b4c944b738d10c5b2807ecf0cd59
+      size: 1693
+  original:
+    hackage: beam-postgres-0.5.3.1
+- completed:
+    hackage: beam-migrate-0.5.2.1@sha256:8418cc3dfbb8ebd63fc7d490167206bce2c1784e4617be4fa9d60ddbe3b7081d,4978
+    pantry-tree:
+      sha256: 63ab4fa0cfb5d78980e97fafbee54f36d50dbf0eeefd349c1c2d8ef73d3b6db3
+      size: 1721
+  original:
+    hackage: beam-migrate-0.5.2.1
 snapshots:
 - completed:
     sha256: 31a722458578b1f709b6fe098d9027bbb5c04b4430e7338a5e69707bd3990e5d

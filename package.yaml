@@ -27,6 +27,7 @@ dependencies:
 - warp
 - beam-core
 - beam-postgres
+- text
 
 ghc-options:
 - -Wall

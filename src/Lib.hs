@@ -3,6 +3,7 @@
 {-# LANGUAGE TypeOperators   #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE NondecreasingIndentation #-}
 
 module Lib
     ( startApp
@@ -15,6 +16,8 @@ import Network.Wai
 import Network.Wai.Handler.Warp
 import Servant
 import GHC.Generics (Generic)
+import Control.Monad.IO.Class (MonadIO(liftIO))
+import Usecase.Simple.UpdateUser (execute)
 
 {-
   仕様
@@ -68,8 +71,9 @@ getUser :: Handler [User]
 getUser = return users
 
 putUser :: Integer -> UserRequest -> Handler String
-putUser _ _ = return "OK"
-
+putUser _ _ = do
+  liftIO execute
+  return "OK"
 
 data UserRequest = UserRequest
   { name          :: UserNameRequest

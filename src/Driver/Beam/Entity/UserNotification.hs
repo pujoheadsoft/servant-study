@@ -9,9 +9,9 @@ import Database.Beam
 
 data UserNotificationT f = User
   {
-    userId :: Columnar f Int,
-    emailNotifications :: Columnar f Bool,
-    pushNotifications :: Columnar f Bool
+    user_id :: Columnar f Int,
+    email_notifications :: Columnar f Bool,
+    push_notifications :: Columnar f Bool
   } deriving Generic
 
 type UserNotification = UserNotificationT Identity
@@ -23,4 +23,4 @@ deriving instance Eq UserNotification
 instance Beamable UserNotificationT
 instance Table UserNotificationT where
   data PrimaryKey UserNotificationT f = UserId (Columnar f Int) deriving (Generic, Beamable)
-  primaryKey = UserId . userId
+  primaryKey = UserId . user_id

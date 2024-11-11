@@ -11,9 +11,9 @@ import Data.Int (Int32)
 
 data UserT f = User
   {
-    userId :: Columnar f Int32,
-    firstName :: Columnar f Text,
-    lastName :: Columnar f Text,
+    user_id :: Columnar f Int32,
+    first_name :: Columnar f Text,
+    last_name :: Columnar f Text,
     email :: Columnar f Text
   } deriving Generic
 
@@ -26,4 +26,4 @@ deriving instance Eq User
 instance Beamable UserT
 instance Table UserT where
   data PrimaryKey UserT f = UserId (Columnar f Int32) deriving (Generic, Beamable)
-  primaryKey = UserId . userId
+  primaryKey = UserId . user_id

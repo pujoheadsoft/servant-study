@@ -25,6 +25,9 @@ source-repository head
 
 library
   exposed-modules:
+      Controller.Router
+      Controller.SystemController
+      Controller.UserController
       Driver.Beam.Config
       Driver.Beam.Database
       Driver.Beam.Entity.User

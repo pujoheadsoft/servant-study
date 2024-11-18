@@ -28,6 +28,8 @@ library
       Controller.Router
       Controller.SystemController
       Controller.UserController
+      Domain.Email
+      Domain.User
       Driver.Beam.Config
       Driver.Beam.Database
       Driver.Beam.Entity.User

@@ -28,6 +28,8 @@ dependencies:
 - beam-core
 - beam-postgres
 - text
+- heftia-effects ^>= 0.5.0
+- ghc-typelits-knownnat ^>= 0.7
 
 ghc-options:
 - -Wall

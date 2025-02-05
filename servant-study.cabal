@@ -49,6 +49,8 @@ library
     , base >=4.7 && <5
     , beam-core
     , beam-postgres
+    , ghc-typelits-knownnat ==0.7.*
+    , heftia-effects >=0.5.0 && <0.6
     , servant-server
     , text
     , wai
@@ -69,6 +71,8 @@ executable servant-study-exe
     , base
     , beam-core
     , beam-postgres
+    , ghc-typelits-knownnat ==0.7.*
+    , heftia-effects >=0.5.0 && <0.6
     , servant-server
     , servant-study
     , text
@@ -91,6 +95,8 @@ test-suite servant-study-test
     , base
     , beam-core
     , beam-postgres
+    , ghc-typelits-knownnat ==0.7.*
+    , heftia-effects >=0.5.0 && <0.6
     , hspec
     , hspec-wai
     , hspec-wai-json

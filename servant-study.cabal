@@ -43,6 +43,19 @@ library
       Paths_servant_study
   hs-source-dirs:
       src
+  default-extensions:
+      LambdaCase
+      DerivingStrategies
+      DataKinds
+      TypeFamilies
+      BlockArguments
+      FunctionalDependencies
+      RecordWildCards
+      DefaultSignatures
+      PatternSynonyms
+      TemplateHaskell
+      PartialTypeSignatures
+      AllowAmbiguousTypes
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       aeson
@@ -65,6 +78,19 @@ executable servant-study-exe
       Paths_servant_study
   hs-source-dirs:
       app
+  default-extensions:
+      LambdaCase
+      DerivingStrategies
+      DataKinds
+      TypeFamilies
+      BlockArguments
+      FunctionalDependencies
+      RecordWildCards
+      DefaultSignatures
+      PatternSynonyms
+      TemplateHaskell
+      PartialTypeSignatures
+      AllowAmbiguousTypes
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
@@ -89,6 +115,19 @@ test-suite servant-study-test
       Paths_servant_study
   hs-source-dirs:
       test
+  default-extensions:
+      LambdaCase
+      DerivingStrategies
+      DataKinds
+      TypeFamilies
+      BlockArguments
+      FunctionalDependencies
+      RecordWildCards
+      DefaultSignatures
+      PatternSynonyms
+      TemplateHaskell
+      PartialTypeSignatures
+      AllowAmbiguousTypes
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
@@ -100,6 +139,7 @@ test-suite servant-study-test
     , hspec
     , hspec-wai
     , hspec-wai-json
+    , mockcat
     , servant-server
     , servant-study
     , text

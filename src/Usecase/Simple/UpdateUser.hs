@@ -1,16 +1,15 @@
+{-# LANGUAGE OverloadedRecordDot #-}
 module Usecase.Simple.UpdateUser where
 
-import Database.Beam.Postgres (runBeamPostgresDebug)
-import Driver.Beam.Config (connection)
-import Database.Beam (runUpdate, save, runInsert, insert, insertValues)
-import Driver.Beam.Database (userDb, UserDb (users))
-import Driver.Beam.Entity.User
 import Data.Text (pack)
 import Data.Int (Int32)
+import Gateway.Simple.UserGateway (update)
+import Domain.User (User(..), UserId (..), UserData (..), UserName (..), UnvalidatedUser)
+import Domain.Email (Email(..))
+import Prelude hiding (last, id)
+import Data.Text.Internal.Read (IParser(P))
 
-execute :: IO ()
-execute = do
-  conn <- connection
-  runBeamPostgresDebug putStrLn conn $ do
-    let u = User (1 :: Int32) (pack "Galileo") (pack "Galilei") (pack "test@hoge.com")
-    runInsert $ insert (users userDb) $ insertValues [u]
+execute :: UnvalidatedUser -> IO ()
+execute user = do
+  let u = User (UserId user.id) (UserData (UserName "user.userData.name.first", "user.userData.name.last") (Email  user.userData.email))
+  update u

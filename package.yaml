@@ -59,6 +59,7 @@ default-extensions:
 - DuplicateRecordFields
 - OverloadedRecordDot
 - NoFieldSelectors
+- OverloadedStrings
 
 library:
   source-dirs: src

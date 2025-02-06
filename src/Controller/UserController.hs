@@ -1,14 +1,16 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Controller.UserController where
 import Servant
 import Database.Beam
 import Data.Aeson
 import Data.Aeson.TH
 import Usecase.Simple.UpdateUser
+import Domain.User (UnvalidatedUser(..), UnvalidatedUserData (..), UserName (..), UserId (UserId))
+import Domain.Email (UnvalidatedEmail(UnvalidatedEmail))
 
 type USER_API = "v1" :> 
   (    "users" :> Get '[JSON] [UserResponse]
@@ -24,8 +26,18 @@ getUser = return
   ]
 
 putUser :: Integer -> UserRequest -> Handler String
-putUser _ _ = do
-  --liftIO execute
+putUser userId request = do
+  let user = UnvalidatedUser
+        { userId = UserId $ fromIntegral userId
+        , userData = UnvalidatedUserData
+          { name = UserName
+            { first = request.name.first
+            , last = request.name.last
+            }
+          , email = UnvalidatedEmail request.email
+          }
+        }
+  liftIO $ execute user
   return "OK"
 
 

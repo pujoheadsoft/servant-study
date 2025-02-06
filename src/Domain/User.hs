@@ -1,4 +1,3 @@
-{-# LANGUAGE DuplicateRecordFields #-}
 module Domain.User where
 import Domain.Email (Email, UnvalidatedEmail)
 

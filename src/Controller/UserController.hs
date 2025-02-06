@@ -9,7 +9,7 @@ import Database.Beam
 import Data.Aeson
 import Data.Aeson.TH
 import Usecase.Simple.UpdateUser
-import Domain.User (UnvalidatedUser(..), UnvalidatedUserData (..), UserName (..), UserId (UserId))
+import Domain.User (UnvalidatedUser(..), UnvalidatedUserData (..), UserName (..), UserId (UserId), NotificationSettings (..))
 import Domain.Email (UnvalidatedEmail(UnvalidatedEmail))
 
 type USER_API = "v1" :> 
@@ -27,17 +27,23 @@ getUser = return
 
 putUser :: Integer -> UserRequest -> Handler String
 putUser userId request = do
-  let user = UnvalidatedUser
-        { userId = UserId $ fromIntegral userId
-        , userData = UnvalidatedUserData
-          { name = UserName
-            { first = request.name.first
-            , last = request.name.last
-            }
-          , email = UnvalidatedEmail request.email
+  let 
+    user = UnvalidatedUser
+      { userId = UserId $ fromIntegral userId
+      , userData = UnvalidatedUserData
+        { name = UserName
+          { first = request.name.first
+          , last = request.name.last
           }
+        , email = UnvalidatedEmail request.email
         }
-  liftIO $ execute user
+      }
+    notificationSettings = NotificationSettings
+      { email = request.notifications.email
+      , push = request.notifications.push
+      }
+      
+  liftIO $ execute user notificationSettings
   return "OK"
 
 

@@ -19,6 +19,10 @@ data UnvalidatedUserData = UnvalidatedUserData
   , email :: UnvalidatedEmail
   } deriving (Eq, Show)
 
+data NotificationSettings = NotificationSettings
+  { email :: Bool
+  , push  :: Bool
+  } deriving (Eq, Show)
 
 -- 新規ユーザー(検証済み)
 type ValidatedNewUser = UserData

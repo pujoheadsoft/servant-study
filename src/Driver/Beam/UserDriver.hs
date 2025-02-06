@@ -6,9 +6,16 @@ import Database.Beam (runInsert, insert)
 import Driver.Beam.Database (UserDb(..), userDb)
 import Database.Beam.Query (insertValues)
 import Driver.Beam.Entity.User (User)
+import Driver.Beam.Entity.UserNotification (UserNotification)
 
-update :: User -> IO ()
-update user = do
+updateUser :: User -> IO ()
+updateUser user = do
   conn <- connection
   runBeamPostgresDebug putStrLn conn $ do
     runInsert $ insert userDb.users $ insertValues [user]
+
+updateNotificationSettings :: UserNotification -> IO ()
+updateNotificationSettings notification = do
+  conn <- connection
+  runBeamPostgresDebug putStrLn conn $ do
+    runInsert $ insert userDb.user_notifications $ insertValues [notification]

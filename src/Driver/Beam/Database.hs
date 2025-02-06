@@ -7,7 +7,7 @@ import Driver.Beam.Entity.UserNotification
 
 data UserDb f = UserDb
   { users :: f (TableEntity UserT)
-  , userNotifications :: f (TableEntity UserNotificationT)
+  , user_notifications :: f (TableEntity UserNotificationT)
   } deriving (Generic, Database be)
 
 userDb :: DatabaseSettings be UserDb

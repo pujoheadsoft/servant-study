@@ -7,10 +7,11 @@
 module Driver.Beam.Entity.UserNotification where
 
 import Database.Beam
+import Data.Int (Int32)
 
-data UserNotificationT f = User
+data UserNotificationT f = UserNotification
   {
-    user_id :: Columnar f Int,
+    user_id :: Columnar f Int32,
     email_notifications :: Columnar f Bool,
     push_notifications :: Columnar f Bool
   } deriving Generic
@@ -23,7 +24,7 @@ deriving instance Eq UserNotification
 
 instance Beamable UserNotificationT
 instance Table UserNotificationT where
-  data PrimaryKey UserNotificationT f = UserId (Columnar f Int) deriving (Generic, Beamable)
+  data PrimaryKey UserNotificationT f = UserId (Columnar f Int32) deriving (Generic, Beamable)
 
   primaryKey :: UserNotificationT column -> PrimaryKey UserNotificationT column
   primaryKey x = UserId x.user_id

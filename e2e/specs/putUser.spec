@@ -5,3 +5,4 @@
 * レスポンスのステータスコードが"200"である
 * レスポンスボディが"OK"である
 * "users"テーブルの内容が"fixtures/expected"にあるCSVファイルの内容と一致する
+* "user_notifications"テーブルの内容が"fixtures/expected"にあるCSVファイルの内容と一致する

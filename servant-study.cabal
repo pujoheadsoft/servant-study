@@ -56,6 +56,8 @@ library
       TemplateHaskell
       PartialTypeSignatures
       AllowAmbiguousTypes
+      DuplicateRecordFields
+      OverloadedRecordDot
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       aeson
@@ -64,6 +66,7 @@ library
     , beam-postgres
     , ghc-typelits-knownnat ==0.7.*
     , heftia-effects >=0.5.0 && <0.6
+    , lens
     , servant-server
     , text
     , wai
@@ -91,6 +94,8 @@ executable servant-study-exe
       TemplateHaskell
       PartialTypeSignatures
       AllowAmbiguousTypes
+      DuplicateRecordFields
+      OverloadedRecordDot
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
@@ -99,6 +104,7 @@ executable servant-study-exe
     , beam-postgres
     , ghc-typelits-knownnat ==0.7.*
     , heftia-effects >=0.5.0 && <0.6
+    , lens
     , servant-server
     , servant-study
     , text
@@ -128,6 +134,8 @@ test-suite servant-study-test
       TemplateHaskell
       PartialTypeSignatures
       AllowAmbiguousTypes
+      DuplicateRecordFields
+      OverloadedRecordDot
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
@@ -139,6 +147,7 @@ test-suite servant-study-test
     , hspec
     , hspec-wai
     , hspec-wai-json
+    , lens
     , mockcat
     , servant-server
     , servant-study

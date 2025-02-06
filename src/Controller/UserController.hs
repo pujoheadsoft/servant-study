@@ -25,7 +25,7 @@ getUser = return
 
 putUser :: Integer -> UserRequest -> Handler String
 putUser _ _ = do
-  liftIO execute
+  --liftIO execute
   return "OK"
 
 

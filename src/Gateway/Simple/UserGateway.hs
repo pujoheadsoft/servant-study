@@ -6,7 +6,7 @@ import Domain.Email (Email(..))
 import Database.Beam.Postgres (runBeamPostgresDebug)
 import Driver.Beam.Config (connection)
 import Database.Beam (runInsert, insert)
-import Driver.Beam.Database (users, userDb)
+import Driver.Beam.Database (UserDb(..), userDb)
 import Database.Beam.Query (insertValues)
 import qualified Driver.Beam.Entity.User as E
 import Domain.User (User(..), UserId(..), UserData(UserData), UserName (UserName))
@@ -16,4 +16,4 @@ update (User (UserId userId) (UserData (UserName first last) (Email email))) = d
   conn <- connection
   runBeamPostgresDebug putStrLn conn $ do
     let u = E.User (fromIntegral userId) (pack first) (pack last) (pack email)
-    runInsert $ insert (users userDb) $ insertValues [u]
+    runInsert $ insert userDb.users $ insertValues [u]

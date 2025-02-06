@@ -58,6 +58,7 @@ library
       AllowAmbiguousTypes
       DuplicateRecordFields
       OverloadedRecordDot
+      NoFieldSelectors
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       aeson
@@ -96,6 +97,7 @@ executable servant-study-exe
       AllowAmbiguousTypes
       DuplicateRecordFields
       OverloadedRecordDot
+      NoFieldSelectors
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
@@ -136,6 +138,7 @@ test-suite servant-study-test
       AllowAmbiguousTypes
       DuplicateRecordFields
       OverloadedRecordDot
+      NoFieldSelectors
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson

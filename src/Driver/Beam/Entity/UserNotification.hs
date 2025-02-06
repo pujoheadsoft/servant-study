@@ -3,6 +3,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE InstanceSigs #-}
 module Driver.Beam.Entity.UserNotification where
 
 import Database.Beam
@@ -23,4 +24,6 @@ deriving instance Eq UserNotification
 instance Beamable UserNotificationT
 instance Table UserNotificationT where
   data PrimaryKey UserNotificationT f = UserId (Columnar f Int) deriving (Generic, Beamable)
-  primaryKey = UserId . user_id
+
+  primaryKey :: UserNotificationT column -> PrimaryKey UserNotificationT column
+  primaryKey x = UserId x.user_id

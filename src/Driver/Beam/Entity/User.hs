@@ -3,6 +3,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE InstanceSigs #-}
 module Driver.Beam.Entity.User where
 
 import Database.Beam
@@ -26,4 +27,5 @@ deriving instance Eq User
 instance Beamable UserT
 instance Table UserT where
   data PrimaryKey UserT f = UserId (Columnar f Int32) deriving (Generic, Beamable)
-  primaryKey = UserId . user_id
+  primaryKey :: UserT column -> PrimaryKey UserT column
+  primaryKey x = UserId x.user_id

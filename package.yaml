@@ -58,6 +58,7 @@ default-extensions:
 - AllowAmbiguousTypes
 - DuplicateRecordFields
 - OverloadedRecordDot
+- NoFieldSelectors
 
 library:
   source-dirs: src

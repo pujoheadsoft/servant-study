@@ -1,7 +1,7 @@
 module Domain.Email where
 
-newtype Email = Email String
+newtype Email = Email { value :: String }
   deriving (Eq, Show)
 
-newtype UnvalidatedEmail = UnvalidatedEmail String
+newtype UnvalidatedEmail = UnvalidatedEmail { value :: String }
   deriving (Eq, Show)

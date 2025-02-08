@@ -8,7 +8,7 @@ import Control.Lens
 execute :: UnvalidatedUser -> NotificationSettings -> IO ()
 execute user notificationSettings = do
   let
-    d = user.userData.email.value
-    u = User user.userId (UserData user.userData.name (Email d))
+    e = user ^. userData . email
+    u = User user.userId (UserData (user ^. userData . name) (Email e.value))
   updateUser u
   updateNotificationSettings u.userId notificationSettings

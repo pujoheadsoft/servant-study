@@ -25,9 +25,12 @@ source-repository head
 
 library
   exposed-modules:
-      Controller.Router
-      Controller.SystemController
-      Controller.UserController
+      Api.Router
+      Api.SystemApi
+      Api.UserApi
+      Architecture.Simple.Controller.UserController
+      Architecture.Simple.Gateway.UserGateway
+      Architecture.Simple.Usecase.UpdateUser
       Domain.Email
       Domain.User
       Driver.Beam.Config
@@ -35,9 +38,7 @@ library
       Driver.Beam.Entity.User
       Driver.Beam.Entity.UserNotification
       Driver.Beam.UserDriver
-      Gateway.Simple.UserGateway
       Lib
-      Usecase.Simple.UpdateUser
   other-modules:
       Paths_servant_study
   autogen-modules:
@@ -67,9 +68,12 @@ library
     , base >=4.7 && <5
     , beam-core
     , beam-postgres
+    , bytestring
+    , email-validate
     , ghc-typelits-knownnat ==0.7.*
     , heftia-effects >=0.5.0 && <0.6
     , lens
+    , safe-exceptions
     , servant-server
     , text
     , wai
@@ -107,9 +111,12 @@ executable servant-study-exe
     , base
     , beam-core
     , beam-postgres
+    , bytestring
+    , email-validate
     , ghc-typelits-knownnat ==0.7.*
     , heftia-effects >=0.5.0 && <0.6
     , lens
+    , safe-exceptions
     , servant-server
     , servant-study
     , text
@@ -121,6 +128,7 @@ test-suite servant-study-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Domain.EmailSpec
       Paths_servant_study
   autogen-modules:
       Paths_servant_study
@@ -145,10 +153,13 @@ test-suite servant-study-test
       OverloadedStrings
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      aeson
+      QuickCheck
+    , aeson
     , base
     , beam-core
     , beam-postgres
+    , bytestring
+    , email-validate
     , ghc-typelits-knownnat ==0.7.*
     , heftia-effects >=0.5.0 && <0.6
     , hspec
@@ -156,6 +167,7 @@ test-suite servant-study-test
     , hspec-wai-json
     , lens
     , mockcat
+    , safe-exceptions
     , servant-server
     , servant-study
     , text

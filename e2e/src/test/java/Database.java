@@ -36,8 +36,8 @@ public class Database {
     truncateTable("user_notifications");
   }
 
-  public void assertTable(String tableName, String csv) throws Exception {
-    CsvDataSet expectedDataSet = new CsvDataSet(new File(csv));
+  public void assertTable(String tableName, String path) throws Exception {
+    CsvDataSet expectedDataSet = new CsvDataSet(new File(path));
 
     IDataSet actualDataSet = databaseTester.getConnection().createDataSet(new String[] { tableName });
     Assertion.assertEqualsIgnoreCols(expectedDataSet, actualDataSet, tableName, new String[] { });
@@ -46,5 +46,9 @@ public class Database {
   private void truncateTable(String tableName) throws Exception {
     IDataSet dataSet = new DefaultDataSet(new ITable[] { new DefaultTable(tableName) });
     DatabaseOperation.TRUNCATE_TABLE.execute(databaseTester.getConnection(), dataSet);
+  }
+
+  public void registerTableData(String path) throws Exception {
+    DatabaseOperation.CLEAN_INSERT.execute(databaseTester.getConnection(), new CsvDataSet(new File(path)));
   }
 }

@@ -31,6 +31,9 @@ dependencies:
 - heftia-effects ^>= 0.5.0
 - ghc-typelits-knownnat ^>= 0.7
 - lens
+- email-validate
+- bytestring
+- safe-exceptions
 
 ghc-options:
 - -Wall
@@ -90,5 +93,6 @@ tests:
     - hspec
     - hspec-wai
     - hspec-wai-json
+    - QuickCheck
     - aeson
     - mockcat

@@ -1,0 +1,11 @@
+{
+  "name": {
+    "first": "権兵衛",
+    "last": "名無しの"
+  },
+  "email": "gonbe.nanashino@anonymouse.com",
+  "notifications": {
+    "email": true,
+    "push": false
+  }
+}

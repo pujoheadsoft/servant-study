@@ -1,9 +1,9 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE DataKinds #-}
-module Controller.Router where
-import Servant
-import Controller.SystemController (SYSTEM_API, ping)
-import Controller.UserController (USER_API, getUser, putUser)
+module Api.Router where
+import Servant ( Proxy(..), type (:<|>)(..), Server )
+import Api.SystemApi (SYSTEM_API, ping)
+import Api.UserApi (USER_API, getUser, putUser)
 
 type API = SYSTEM_API :<|> USER_API
 

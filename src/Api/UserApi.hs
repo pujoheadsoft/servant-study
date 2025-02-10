@@ -3,20 +3,22 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Controller.UserController where
+module Api.UserApi where
 import Servant
-import Database.Beam
 import Data.Aeson
 import Data.Aeson.TH
-import Usecase.Simple.UpdateUser
 import Domain.User (UnvalidatedUser(..), UnvalidatedUserData (..), UserName (..), UserId (UserId), NotificationSettings (..))
 import Domain.Email (UnvalidatedEmail(UnvalidatedEmail))
+import GHC.Generics (Generic)
+import Architecture.Simple.Controller.UserController (handleSaveUserRequest)
 
-type USER_API = "v1" :> 
-  (    "users" :> Get '[JSON] [UserResponse]
-  :<|> "simple" :> "users" :> Capture "userId" Integer
-                           :> ReqBody '[JSON] UserRequest
-                           :> Put '[PlainText] String
+type USER_API =
+  "v1" :> "users" :>
+  (    Get '[JSON] [UserResponse]  -- GET: /v1/users
+  :<|> Capture "userId" Integer
+       :> QueryParam "architecture" String
+       :> ReqBody '[JSON] UserRequest
+       :> Put '[PlainText] String  -- PUT: /v1/users/${userId}?architecture=simple
   )
 
 getUser :: Handler [UserResponse]
@@ -25,8 +27,8 @@ getUser = return
   , UserResponse 2 "Albert" "Einstein"
   ]
 
-putUser :: Integer -> UserRequest -> Handler String
-putUser userId request = do
+putUser :: Integer -> Maybe String -> UserRequest -> Handler String
+putUser userId architecture request = do
   let 
     user = UnvalidatedUser
       { userId = UserId $ fromIntegral userId
@@ -42,8 +44,9 @@ putUser userId request = do
       { email = request.notifications.email
       , push = request.notifications.push
       }
-      
-  liftIO $ execute user notificationSettings
+
+  handleSaveUserRequest user notificationSettings
+
   return "OK"
 
 

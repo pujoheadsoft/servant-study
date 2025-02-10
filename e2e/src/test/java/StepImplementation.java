@@ -56,4 +56,9 @@ public class StepImplementation {
   public void verifyTableData(String tableName, String path) throws Exception {
     Database.getInstance().assertTable(tableName, path);
   }
+
+  @Step("<path>にあるCSVファイルの内容がDBに登録されている")
+  public void registerTableData(String path) throws Exception {
+    Database.getInstance().registerTableData(path);
+  }
 }

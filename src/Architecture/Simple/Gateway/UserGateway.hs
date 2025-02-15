@@ -1,21 +1,22 @@
-{-# OPTIONS_GHC -Wno-name-shadowing #-}
 module Architecture.Simple.Gateway.UserGateway where
 
 import Data.Text (pack)
 import Domain.Email (Email(value))
-import qualified Driver.Beam.UserDriver as UserDriver
-import qualified Driver.Beam.Entity.User as E
-import qualified Driver.Beam.Entity.UserNotification as N
+import qualified Driver.UserDb.Schema as S
 import Domain.User (User(..), UserId(..), UserData(UserData), UserName (UserName), NotificationSettings (..))
 import Control.Exception.Safe (MonadThrow)
-import Control.Monad.IO.Class (MonadIO)
 
-updateUser :: (MonadThrow m, MonadIO m) => User -> m ()
-updateUser (User (UserId userId) (UserData (UserName first last) email)) = do
-  let u = E.User (fromIntegral userId) (pack first) (pack last) (pack email.value)
-  UserDriver.updateUser u
+saveUser :: (MonadThrow m) => UserGatewayPort m -> User -> m ()
+saveUser port (User (UserId userId) (UserData (UserName first last) email)) = do
+  let u = S.User (fromIntegral userId) (pack first) (pack last) (pack email.value)
+  port.saveUser u
 
-updateNotificationSettings :: (MonadThrow m, MonadIO m) => UserId -> NotificationSettings -> m ()
-updateNotificationSettings (UserId userId) (NotificationSettings email push) = do
-  let n = N.UserNotification (fromIntegral userId) email push
-  UserDriver.updateNotificationSettings n
+saveNotificationSettings :: (MonadThrow m) => UserGatewayPort m -> UserId -> NotificationSettings -> m ()
+saveNotificationSettings port (UserId userId) (NotificationSettings email push) = do
+  let n = S.UserNotification (fromIntegral userId) email push
+  port.saveNotificationSettings n
+
+data UserGatewayPort m = UserGatewayPort {
+  saveUser :: S.User -> m (),
+  saveNotificationSettings :: S.UserNotification -> m ()
+}

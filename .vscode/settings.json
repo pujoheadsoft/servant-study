@@ -3,5 +3,5 @@
     "*.spec": "gauge",
     "*.cpt": "gauge"
   },
-  "java.configuration.updateBuildConfiguration": "interactive"
+  "java.configuration.updateBuildConfiguration": "automatic"
 }

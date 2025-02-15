@@ -25,19 +25,30 @@ source-repository head
 
 library
   exposed-modules:
+      Api.Configuration
       Api.Router
       Api.SystemApi
       Api.UserApi
+      Architecture.Heftia.Controller.UserController
+      Architecture.Heftia.Gateway.UserGateway
+      Architecture.Heftia.Gateway.UserGatewayPort
+      Architecture.Heftia.Usecase.SaveUser
+      Architecture.Polysemy.Controller.UserController
+      Architecture.Polysemy.Gateway.UserGateway
+      Architecture.Polysemy.Gateway.UserGatewayPort
+      Architecture.Polysemy.Usecase.SaveUser
       Architecture.Simple.Controller.UserController
       Architecture.Simple.Gateway.UserGateway
-      Architecture.Simple.Usecase.UpdateUser
+      Architecture.Simple.Usecase.SaveUser
+      Architecture.TaglessFinal.Controller.UserController
+      Architecture.TaglessFinal.Gateway.UserGateway
+      Architecture.TaglessFinal.Gateway.UserGatewayPort
+      Architecture.TaglessFinal.Usecase.SaveUser
       Domain.Email
       Domain.User
-      Driver.Beam.Config
-      Driver.Beam.Database
-      Driver.Beam.Entity.User
-      Driver.Beam.Entity.UserNotification
-      Driver.Beam.UserDriver
+      Driver.Api.NotificationApiDriver
+      Driver.UserDb.Schema
+      Driver.UserDb.UserDriver
       Lib
   other-modules:
       Paths_servant_study
@@ -62,23 +73,30 @@ library
       OverloadedRecordDot
       NoFieldSelectors
       OverloadedStrings
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -fplugin=Polysemy.Plugin
   build-depends:
       aeson
     , base >=4.7 && <5
-    , beam-core
-    , beam-postgres
     , bytestring
     , email-validate
     , ghc-typelits-knownnat ==0.7.*
     , heftia-effects >=0.5.0 && <0.6
     , lens
+    , modern-uri
+    , monad-logger
+    , mtl
+    , persistent
+    , persistent-postgresql
+    , polysemy
+    , polysemy-plugin
+    , req
     , safe-exceptions
     , servant-server
     , text
     , wai
     , warp
-  default-language: Haskell2010
+    , yaml
+  default-language: GHC2021
 
 executable servant-study-exe
   main-is: Main.hs
@@ -105,23 +123,30 @@ executable servant-study-exe
       OverloadedRecordDot
       NoFieldSelectors
       OverloadedStrings
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -fplugin=Polysemy.Plugin -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
     , base
-    , beam-core
-    , beam-postgres
     , bytestring
     , email-validate
     , ghc-typelits-knownnat ==0.7.*
     , heftia-effects >=0.5.0 && <0.6
     , lens
+    , modern-uri
+    , monad-logger
+    , mtl
+    , persistent
+    , persistent-postgresql
+    , polysemy
+    , polysemy-plugin
+    , req
     , safe-exceptions
     , servant-server
     , servant-study
     , text
     , wai
     , warp
+    , yaml
   default-language: Haskell2010
 
 test-suite servant-study-test
@@ -151,13 +176,11 @@ test-suite servant-study-test
       OverloadedRecordDot
       NoFieldSelectors
       OverloadedStrings
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -fplugin=Polysemy.Plugin -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       QuickCheck
     , aeson
     , base
-    , beam-core
-    , beam-postgres
     , bytestring
     , email-validate
     , ghc-typelits-knownnat ==0.7.*
@@ -167,10 +190,19 @@ test-suite servant-study-test
     , hspec-wai-json
     , lens
     , mockcat
+    , modern-uri
+    , monad-logger
+    , mtl
+    , persistent
+    , persistent-postgresql
+    , polysemy
+    , polysemy-plugin
+    , req
     , safe-exceptions
     , servant-server
     , servant-study
     , text
     , wai
     , warp
+    , yaml
   default-language: Haskell2010

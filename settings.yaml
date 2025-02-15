@@ -1,0 +1,10 @@
+db:
+  user    : "_env:DB_USER:admin"
+  password: "_env:DB_PASS:admin"
+  host    : "_env:DB_HOST:localhost"
+  port    : "_env:DB_PORT:5432"
+  database: "_env:DB_DATABASE:user"
+  poolsize: "_env:DB_POOLSIZE:10"
+api:
+  notification: 
+    baseUrl: "_env:NOTIFICATION_API_BASE_URL:http://localhost:8080"

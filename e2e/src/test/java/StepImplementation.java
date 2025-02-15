@@ -16,7 +16,7 @@ public class StepImplementation {
   public void sendGetRequest(String path) throws Exception {
     HttpClient client = HttpClient.newHttpClient();
     HttpRequest request = HttpRequest.newBuilder()
-        .uri(new URI("http://localhost:8080" + path))
+        .uri(new URI("http://localhost:8081" + path))
         .build();
 
     HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
@@ -27,9 +27,23 @@ public class StepImplementation {
 
   @Step("パス<path>にJSON<json>でPUTリクエストを送信する")
   public void sendPutRequest(String path, String json) throws Exception {
+    doSendPutRequest("http://localhost:8081" + path, json);
+  }
+
+  @Step("パス<path>(architecture=<architecture>)にJSON<json>でPUTリクエストを送信する")
+  public void sendPutRequest(String path, String architecture, String json) throws Exception {
+    doSendPutRequest("http://localhost:8081" + path + "?architecture=" + architecture, json);
+  }  
+
+  @Step("パス<path>(architecture=<architecture>, withNotify=<withNotify>)にJSON<json>でPUTリクエストを送信する")
+  public void sendPutRequest(String path, String architecture, Boolean withNotify, String json) throws Exception {
+    doSendPutRequest("http://localhost:8081" + path + "?architecture=" + architecture + "&withNotify=" + withNotify, json);
+  }
+
+  public void doSendPutRequest(String uri, String json) throws Exception {
     HttpClient client = HttpClient.newHttpClient();
     HttpRequest request = HttpRequest.newBuilder()
-        .uri(new URI("http://localhost:8080" + path))
+        .uri(new URI(uri))
         .header("Content-Type", "application/json")
         .PUT(BodyPublishers.ofString(json))
         .build();
@@ -61,4 +75,15 @@ public class StepImplementation {
   public void registerTableData(String path) throws Exception {
     Database.getInstance().registerTableData(path);
   }
+
+  @Step("通知先のAPIのパス<path>にPOSTリクエストが送信されたら、ステータスコード<status>を返す")
+  public void verifyPostRequest(String path, Integer status) {
+    WireMockClient.getInstance().setupPost(path, status);
+  }
+
+  @Step("通知先のAPIのパス<path>にJSON<json>でPOSTリクエストが送信された")
+  public void verifyPostRequest(String path, String json) {
+    WireMockClient.getInstance().assertPost(path, json);
+  }
+
 }

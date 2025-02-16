@@ -17,6 +17,8 @@ import qualified Architecture.Polysemy.Controller.UserController as Polysemy
 import qualified Architecture.Heftia.Controller.UserController as Heftia
 import Control.Exception (throw)
 import Data.Maybe (fromMaybe)
+import Api.Configuration (ApiSettings(..))
+import Data.Text (Text)
 
 data Architecture
   = Simple
@@ -40,15 +42,15 @@ getUser _ = pure
   , UserResponse 2 "Albert" "Einstein"
   ]
 
-putUser :: ConnectionPool -> Integer -> Maybe Architecture -> Maybe Bool -> UserRequest -> Handler String
-putUser pool userId architecture _withNotify request = do
+putUser :: ApiSettings -> ConnectionPool -> Integer -> Maybe Architecture -> Maybe Bool -> UserRequest -> Handler String
+putUser apiSettings pool userId architecture _withNotify request = do
   let 
     user = toUnvalidatedUser userId request
     notificationSettings = toNotificationSettings request
     withNotify = fromMaybe False _withNotify
 
   case architecture of
-    Just Simple -> Simple.handleSaveUserRequest pool user notificationSettings
+    Just Simple -> Simple.handleSaveUserRequest apiSettings.notification pool user notificationSettings withNotify
     Just TaglessFinal -> TaglessFinal.handleSaveUserRequest pool user notificationSettings
     Just Polysemy -> Polysemy.handleSaveUserRequest pool user notificationSettings
     Just Heftia -> Heftia.handleSaveUserRequest2 pool user notificationSettings
@@ -80,8 +82,8 @@ data UserRequest = UserRequest
   } deriving (Eq, Show, Generic)
 
 data UserNameRequest = UserNameRequest
-  { first :: String
-  , last  :: String
+  { first :: Text
+  , last  :: Text
   } deriving (Eq, Show, Generic)
 
 data NotificationRequest = NotificationRequest

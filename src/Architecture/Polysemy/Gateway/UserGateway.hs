@@ -11,7 +11,7 @@ import Polysemy (Member, Sem)
 
 saveUser :: (Member Port.UserGatewayPort r) => User -> Sem r ()
 saveUser (User (UserId userId) (UserData (UserName first last) email)) = do
-  let u = S.User (fromIntegral userId) (pack first) (pack last) (pack email.value)
+  let u = S.User (fromIntegral userId) first last (pack email.value)
   Port.saveUser u
 
 saveNotificationSettings :: (Member Port.UserGatewayPort r) => UserId -> NotificationSettings -> Sem r ()

@@ -38,13 +38,17 @@ library
       Architecture.Polysemy.Gateway.UserGatewayPort
       Architecture.Polysemy.Usecase.SaveUser
       Architecture.Simple.Controller.UserController
+      Architecture.Simple.Gateway.NotificationGateway
       Architecture.Simple.Gateway.UserGateway
+      Architecture.Simple.Usecase.NotificationPort
       Architecture.Simple.Usecase.SaveUser
+      Architecture.Simple.Usecase.UserPort
       Architecture.TaglessFinal.Controller.UserController
       Architecture.TaglessFinal.Gateway.UserGateway
       Architecture.TaglessFinal.Gateway.UserGatewayPort
       Architecture.TaglessFinal.Usecase.SaveUser
       Domain.Email
+      Domain.Message
       Domain.User
       Driver.Api.NotificationApiDriver
       Driver.UserDb.Schema

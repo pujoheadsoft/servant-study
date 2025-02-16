@@ -8,7 +8,7 @@ import Control.Exception.Safe (MonadThrow)
 
 saveUser :: (MonadThrow m) => UserGatewayPort m -> User -> m ()
 saveUser port (User (UserId userId) (UserData (UserName first last) email)) = do
-  let u = S.User (fromIntegral userId) (pack first) (pack last) (pack email.value)
+  let u = S.User (fromIntegral userId) first last (pack email.value)
   port.saveUser u
 
 saveNotificationSettings :: (MonadThrow m) => UserGatewayPort m -> UserId -> NotificationSettings -> m ()

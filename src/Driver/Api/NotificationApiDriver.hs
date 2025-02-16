@@ -6,24 +6,25 @@ import Api.Configuration (NotificationApiSettings(..))
 import Text.URI (mkURI)
 import Data.Text (pack, Text)
 import Control.Exception.Safe (throwIO, Exception)
+import Control.Monad.IO.Class (MonadIO)
 
 post
-  :: (ToJSON payload, FromJSON response)
+  :: (ToJSON payload, FromJSON response, MonadIO m)
   => NotificationApiSettings
   -> Text
   -> payload
-  -> IO response
+  -> m response
 post settings endpoint payload = runReq defaultHttpConfig $ do
-  x <- mkURI $ pack settings.baseUrl
-  result <- maybe (throwIO (ParseURIException $ "Error: URI not found: " <> settings.baseUrl)) pure (useURI x)
-  response <- either k k result
+  uri <- mkURI $ pack settings.baseUrl
+  url <- maybe (throwIO (ParseURIException $ "Error: URI not found: " <> settings.baseUrl)) pure (useURI uri)
+  response <- either toRequest toRequest url
 
   pure (responseBody response)
   where
-    k :: FromJSON b => (Url scheme, Option scheme) -> Req (JsonResponse b)
-    k (u, o) = req POST (u /: endpoint) (ReqBodyJson payload) jsonResponse o
+    toRequest :: FromJSON b => (Url scheme, Option scheme) -> Req (JsonResponse b)
+    toRequest (u, o) = req POST (u /: "notifications" /: endpoint) (ReqBodyJson payload) jsonResponse o
 
-postMessage :: NotificationApiSettings -> String -> IO ()
+postMessage :: MonadIO m => NotificationApiSettings -> Text -> m ()
 postMessage settings message = do
   let payload = object [ "message" .= message ]
   post settings (pack "userRegistered") payload

@@ -1,14 +1,16 @@
 {-# LANGUAGE FlexibleInstances #-}
 module Domain.User where
 import Domain.Email (Email, UnvalidatedEmail)
-import Control.Lens (makeLenses, makeFieldsId)
+import Control.Lens (makeFieldsId)
+import Data.Text (Text)
 
 newtype UserId = UserId { value :: Int }
-  deriving (Eq, Show)
+  deriving newtype (Eq, Show)
+makeFieldsId ''UserId
 
 data UserName = UserName
-  { first :: String
-  , last  :: String
+  { first :: Text
+  , last  :: Text
   } deriving (Eq, Show)
 makeFieldsId ''UserName
 

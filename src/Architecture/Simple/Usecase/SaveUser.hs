@@ -10,7 +10,7 @@ import Architecture.Simple.Usecase.UserPort (UserPort(..))
 import Architecture.Simple.Usecase.NotificationPort (NotificationPort(..))
 import Domain.Message (Message(Message))
 import Control.Monad (when)
-import Data.Text (pack)
+import Data.Text (pack, Text)
 
 eitherThrow :: (MonadThrow m, Exception e) => Either e a -> m a
 eitherThrow = throw ||| pure
@@ -33,5 +33,6 @@ execute userPort notificationPort user notificationSettings withNotify = do
   userPort.saveNotificationSettings u.userId notificationSettings
 
   when withNotify do
-    notificationPort.sendNotification $
-      Message $ pack $ "ユーザーID: " <> show (user ^. userId) <> "で、" <> (show userName.last <> show userName.first) <> "さんが登録されました。"
+    notificationPort.sendNotification do
+      let n = userName.last <> userName.first :: Text
+      Message $ (pack "ユーザーID: ") <> (pack $ show (user ^. userId)) <> (pack "で、") <> n <> (pack "さんが登録されました。")

@@ -7,8 +7,6 @@ import Text.URI (mkURI)
 import Data.Text (pack, Text)
 import Control.Exception.Safe (throwIO, Exception)
 import Control.Monad.IO.Class (MonadIO)
-import Data.Aeson.Text (encodeToLazyText)
-import Data.Text.Lazy.Encoding (encodeUtf8)
 
 post
   :: (ToJSON payload, FromJSON response, MonadIO m)
@@ -23,15 +21,12 @@ post settings endpoint payload = runReq defaultHttpConfig $ do
   pure (responseBody response)
   where
     toRequest :: FromJSON b => (Url scheme, Option scheme) -> Req (JsonResponse b)
-    toRequest (u, o) = do
-      let lbs = encodeUtf8 $ encodeToLazyText payload
-      req POST (u /: "notifications" /: endpoint) (ReqBodyLbs lbs) jsonResponse o
+    toRequest (u, o) = req POST (u /: "notifications" /: endpoint) (ReqBodyJson payload) jsonResponse o
 
 postMessage :: MonadIO m => NotificationApiSettings -> Text -> m ()
 postMessage settings message = do
   let
-    text = "ユーザーID: 1で、名無しの権兵衛さんが登録されました。" :: Text
-    payload = object [ "message" .= text ]
+    payload = object [ "message" .= message ]
   post settings (pack "userRegistered") payload
 
 newtype ParseURIException = ParseURIException String

@@ -44,8 +44,11 @@ library
       Architecture.Simple.Usecase.SaveUser
       Architecture.Simple.Usecase.UserPort
       Architecture.TaglessFinal.Controller.UserController
+      Architecture.TaglessFinal.Gateway.NotificationGateway
+      Architecture.TaglessFinal.Gateway.NotificationGatewayPort
       Architecture.TaglessFinal.Gateway.UserGateway
       Architecture.TaglessFinal.Gateway.UserGatewayPort
+      Architecture.TaglessFinal.Usecase.NotificationPort
       Architecture.TaglessFinal.Usecase.SaveUser
       Architecture.TaglessFinal.Usecase.UserPort
       Domain.Email

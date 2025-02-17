@@ -3,6 +3,7 @@
 |architecture|
 |------------|
 |simple      |
+|taglessFinal|
 
 ## ユーザー情報を登録しそれを通知することができる
 * 通知先のAPIのパス"/notifications/userRegistered"にPOSTリクエストが送信されたら、ステータスコード"200"を返す

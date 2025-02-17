@@ -7,9 +7,17 @@ import Control.Exception.Safe (MonadThrow, Exception)
 import Control.Exception (throw)
 import Control.Arrow ((|||))
 import Architecture.TaglessFinal.Usecase.UserPort
+import Architecture.TaglessFinal.Usecase.NotificationPort
+import Control.Monad (when)
+import Domain.Message (registeredUserMessage)
 
-execute :: (MonadThrow m, UserPort m) => UnvalidatedUser -> NotificationSettings -> m ()
-execute user notificationSettings = do
+execute
+  :: (MonadThrow m, UserPort m, NotificationPort m)
+  => UnvalidatedUser
+  -> NotificationSettings
+  -> Bool
+  -> m ()
+execute user notificationSettings withNotify = do
   validEmail <- eitherThrow . makeEmail $ user ^. userData . email . value
   let
     userName = user ^. userData . name
@@ -17,6 +25,9 @@ execute user notificationSettings = do
 
   saveUser u
   saveNotificationSettings u.userId notificationSettings
+
+  when withNotify do
+    sendNotification (registeredUserMessage u.userId userName)
 
 eitherThrow :: (MonadThrow m, Exception e) => Either e a -> m a
 eitherThrow = throw ||| pure

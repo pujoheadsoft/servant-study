@@ -47,6 +47,7 @@ library
       Architecture.TaglessFinal.Gateway.UserGateway
       Architecture.TaglessFinal.Gateway.UserGatewayPort
       Architecture.TaglessFinal.Usecase.SaveUser
+      Architecture.TaglessFinal.Usecase.UserPort
       Domain.Email
       Domain.Message
       Domain.User

@@ -12,13 +12,14 @@ import Data.ByteString.Lazy.Char8 (pack)
 import qualified Data.Text as T
 import Database.Persist.Postgresql (runSqlPool, ConnectionPool, SqlBackend)
 import Control.Monad.IO.Class (liftIO, MonadIO)
-import Architecture.TaglessFinal.Usecase.SaveUser (execute, UserUsecasePort(..))
+import Architecture.TaglessFinal.Usecase.SaveUser (execute)
 
 import Control.Monad.Logger (logErrorN, runStdoutLoggingT)
 import Control.Monad.Reader (ReaderT)
 import qualified Architecture.TaglessFinal.Gateway.UserGateway as Gateway
 import qualified Architecture.TaglessFinal.Gateway.UserGatewayPort as GatewayPort
 import qualified Driver.UserDb.UserDriver as Driver
+import Architecture.TaglessFinal.Usecase.UserPort
 
 handleSaveUserRequest :: ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Handler String
 handleSaveUserRequest pool user notificationSettings = do
@@ -34,7 +35,7 @@ handleSaveUserRequest pool user notificationSettings = do
     throwError $ err500 { errBody = pack $ show e }
   ]
 
-instance UserUsecasePort (ReaderT SqlBackend IO) where
+instance UserPort (ReaderT SqlBackend IO) where
   saveUser = Gateway.saveUser
   saveNotificationSettings = Gateway.saveNotificationSettings
 

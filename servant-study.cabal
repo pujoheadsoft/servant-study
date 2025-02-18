@@ -30,9 +30,13 @@ library
       Api.SystemApi
       Api.UserApi
       Architecture.Heftia.Controller.UserController
+      Architecture.Heftia.Gateway.NotificationGateway
+      Architecture.Heftia.Gateway.NotificationGatewayPort
       Architecture.Heftia.Gateway.UserGateway
       Architecture.Heftia.Gateway.UserGatewayPort
+      Architecture.Heftia.Usecase.NotificationPort
       Architecture.Heftia.Usecase.SaveUser
+      Architecture.Heftia.Usecase.UserPort
       Architecture.Polysemy.Controller.UserController
       Architecture.Polysemy.Gateway.NotificationGateway
       Architecture.Polysemy.Gateway.NotificationGatewayPort

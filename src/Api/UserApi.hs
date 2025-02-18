@@ -52,7 +52,7 @@ putUser apiSettings pool userId architecture _withNotify request = do
   case architecture of
     Just Simple -> Simple.handleSaveUserRequest apiSettings.notification pool user notificationSettings withNotify
     Just TaglessFinal -> TaglessFinal.handleSaveUserRequest apiSettings.notification pool user notificationSettings withNotify
-    Just Polysemy -> Polysemy.handleSaveUserRequest pool user notificationSettings
+    Just Polysemy -> Polysemy.handleSaveUserRequest apiSettings.notification pool user notificationSettings withNotify
     Just Heftia -> Heftia.handleSaveUserRequest2 pool user notificationSettings
     Nothing -> throw $ err400 { errBody = "Missing architecture query parameter" }
 

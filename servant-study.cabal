@@ -34,8 +34,11 @@ library
       Architecture.Heftia.Gateway.UserGatewayPort
       Architecture.Heftia.Usecase.SaveUser
       Architecture.Polysemy.Controller.UserController
+      Architecture.Polysemy.Gateway.NotificationGateway
+      Architecture.Polysemy.Gateway.NotificationGatewayPort
       Architecture.Polysemy.Gateway.UserGateway
       Architecture.Polysemy.Gateway.UserGatewayPort
+      Architecture.Polysemy.Usecase.NotificationPort
       Architecture.Polysemy.Usecase.SaveUser
       Architecture.Polysemy.Usecase.UserPort
       Architecture.Simple.Controller.UserController

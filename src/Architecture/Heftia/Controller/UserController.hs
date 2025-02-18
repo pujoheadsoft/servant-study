@@ -38,20 +38,20 @@ runRunSql pool = interpret \case
   RunSql a -> liftIO $ runSqlPool a pool
 
 -- runSqlPoolを直接使う版
-handleSaveUserRequest :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> Handler String
-handleSaveUserRequest apiSetting pool user notificationSettings withNotify = do
-  liftIO $ flip runSqlPool pool do
-    run apiSetting user notificationSettings withNotify >>= either
-      Ex.throw -- 外側のハンドラに任せる
-      \_ -> pure "OK"
-  `catches`
-  [ Ex.Handler $ \(InvalidEmailFormat e) -> do
-    logError e
-    throwError $ err400 { errBody = pack e }
-  , Ex.Handler $ \(SomeException e) -> do
-    logError e
-    throwError $ err500 { errBody = pack $ show e }
-  ]
+-- handleSaveUserRequest :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> Handler String
+-- handleSaveUserRequest apiSetting pool user notificationSettings withNotify = do
+--   liftIO $ flip runSqlPool pool do
+--     run apiSetting user notificationSettings withNotify >>= either
+--       Ex.throw -- 外側のハンドラに任せる
+--       \_ -> pure "OK"
+--   `catches`
+--   [ Ex.Handler $ \(InvalidEmailFormat e) -> do
+--     logError e
+--     throwError $ err400 { errBody = pack e }
+--   , Ex.Handler $ \(SomeException e) -> do
+--     logError e
+--     throwError $ err500 { errBody = pack $ show e }
+--   ]
 
 -- runSqlPoolもエフェクトに処理させる版
 handleSaveUserRequest2 :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> Handler String
@@ -68,15 +68,15 @@ handleSaveUserRequest2 apiSetting pool user notificationSettings withNotify = do
     throwError $ err500 { errBody = pack $ show e }
   ]
 
-run :: NotificationApiSettings -> UnvalidatedUser -> NotificationSettings -> Bool -> ReaderT SqlBackend IO (Either EmailError ())
-run apiSetting user notificationSettings withNotify =
-  runEff
-  . runThrow
-  . runUserGatewayPort
-  . runUserPort
-  . runNotificationGatewayPort apiSetting
-  . runNotificationPort
-  $ execute user notificationSettings withNotify
+-- run :: NotificationApiSettings -> UnvalidatedUser -> NotificationSettings -> Bool -> ReaderT SqlBackend IO (Either EmailError ())
+-- run apiSetting user notificationSettings withNotify =
+--   runEff
+--   . runThrow
+--   . runUserGatewayPort
+--   . runUserPort
+--   . runNotificationGatewayPort apiSetting
+--   . runNotificationPort
+--   $ execute user notificationSettings withNotify
 
 run2 :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> IO ()
 run2 apiSetting pool user notification withNotify  = do
@@ -118,15 +118,15 @@ runGatewayPort2 = translate go
       UserGatewayPort.SaveNotificationSettings notification -> RunSql $ UserDriver.saveNotificationSettings @IO notification
 
 runNotificationGatewayPort
-  :: (ReaderT SqlBackend IO <| r)
+  :: (IO <| r)
   => NotificationApiSettings
   -> eh :!! NotificationGatewayPort.NotificationGatewayPort ': r ~> eh :!! r
 runNotificationGatewayPort apiSetting = interpret \case
-  NotificationGatewayPort.SendNotification message -> send $ NotificationDriver.postMessage apiSetting message
+  NotificationGatewayPort.SendNotification message -> NotificationDriver.postMessage apiSetting message
 
 runNotificationGatewayPort2
-  :: (RunSql IO <| r)
+  :: (IO <| r)
   => NotificationApiSettings
   -> eh :!! NotificationGatewayPort.NotificationGatewayPort ': r ~> eh :!! r
 runNotificationGatewayPort2 apiSetting = interpret \case
-  NotificationGatewayPort.SendNotification message -> send $ NotificationDriver.postMessage apiSetting message
+  NotificationGatewayPort.SendNotification message -> NotificationDriver.postMessage apiSetting message

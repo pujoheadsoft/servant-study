@@ -1,19 +1,12 @@
-{-# LANGUAGE TemplateHaskell, LambdaCase, BlockArguments, GADTs
-           , FlexibleContexts, TypeOperators, DataKinds, PolyKinds, ScopedTypeVariables #-}
 module Architecture.Polysemy.Usecase.SaveUser where
 
-import Domain.User (User(..), UserData (..), UnvalidatedUser(..), NotificationSettings, HasUserData(..), HasUserId(..), HasEmail(..), HasName(..), UserId)
+import Domain.User (User(..), UserData (..), UnvalidatedUser(..), NotificationSettings, HasUserData(..), HasUserId(..), HasEmail(..), HasName(..))
 import Domain.Email (makeEmail, HasValue(..), EmailError)
 import Control.Lens ((^.))
 import Control.Arrow ((|||))
-import Polysemy (makeSem, Member, Sem)
+import Polysemy (Member, Sem)
 import Polysemy.Error (Error, throw)
-
-data UserUsecasePort m a where
-  SaveUser :: User -> UserUsecasePort m ()
-  SaveNotificationSettings :: UserId -> NotificationSettings -> UserUsecasePort m ()
-
-makeSem ''UserUsecasePort
+import Architecture.Polysemy.Usecase.UserPort (UserUsecasePort, saveUser, saveNotificationSettings)
 
 execute :: (Member UserUsecasePort r, Member (Error EmailError) r) => UnvalidatedUser -> NotificationSettings -> Sem r ()
 execute user notificationSettings = do

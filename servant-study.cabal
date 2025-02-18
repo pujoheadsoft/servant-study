@@ -37,6 +37,7 @@ library
       Architecture.Polysemy.Gateway.UserGateway
       Architecture.Polysemy.Gateway.UserGatewayPort
       Architecture.Polysemy.Usecase.SaveUser
+      Architecture.Polysemy.Usecase.UserPort
       Architecture.Simple.Controller.UserController
       Architecture.Simple.Gateway.NotificationGateway
       Architecture.Simple.Gateway.UserGateway

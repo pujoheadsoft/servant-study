@@ -12,15 +12,17 @@ import Data.ByteString.Lazy.Char8 (pack)
 import qualified Data.Text as T
 import Database.Persist.Postgresql (runSqlPool, ConnectionPool, SqlBackend)
 import Control.Monad.IO.Class (liftIO, MonadIO)
-import Architecture.Polysemy.Usecase.SaveUser (execute, UserUsecasePort(..))
+import Architecture.Polysemy.Usecase.SaveUser (execute)
 
 import Control.Monad.Logger (logErrorN, runStdoutLoggingT)
-import qualified Architecture.Polysemy.Gateway.UserGateway as Gateway
-import qualified Architecture.Polysemy.Gateway.UserGatewayPort as GatewayPort
-import qualified Driver.UserDb.UserDriver as Driver
+
 import Polysemy (runM, Member, Embed, Sem, interpret, embed)
 import Polysemy.Error (runError)
 import Control.Monad.Reader (ReaderT)
+import qualified Architecture.Polysemy.Usecase.UserPort as UserPort
+import qualified Architecture.Polysemy.Gateway.UserGateway as Gateway
+import qualified Architecture.Polysemy.Gateway.UserGatewayPort as GatewayPort
+import qualified Driver.UserDb.UserDriver as Driver
 
 handleSaveUserRequest :: ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Handler String
 handleSaveUserRequest pool user notificationSettings = do
@@ -49,10 +51,10 @@ run user notificationSettings =
 logError :: (MonadIO m, Show a) => a -> m ()
 logError e = runStdoutLoggingT $ logErrorN $ T.pack $ show e
 
-runUsecasePort :: Member GatewayPort.UserGatewayPort r => Sem (UserUsecasePort : r) a -> Sem r a
+runUsecasePort :: Member GatewayPort.UserGatewayPort r => Sem (UserPort.UserUsecasePort : r) a -> Sem r a
 runUsecasePort = interpret \case
-  SaveUser user -> Gateway.saveUser user
-  SaveNotificationSettings userId notification -> Gateway.saveNotificationSettings userId notification
+  UserPort.SaveUser user -> Gateway.saveUser user
+  UserPort.SaveNotificationSettings userId notification -> Gateway.saveNotificationSettings userId notification
 
 runGatewayPort :: Member (Embed (ReaderT SqlBackend IO)) r => Sem (GatewayPort.UserGatewayPort : r) a -> Sem r a
 runGatewayPort = interpret \case

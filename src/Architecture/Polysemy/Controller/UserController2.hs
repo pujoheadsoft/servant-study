@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE FlexibleContexts #-}
-module Architecture.Polysemy.Controller.UserController where
+module Architecture.Polysemy.Controller.UserController2 where
 
 import Domain.User (UnvalidatedUser, NotificationSettings)
 import Domain.Email (EmailError(InvalidEmailFormat))
@@ -59,9 +59,7 @@ logError :: (MonadIO m, Show a) => a -> m ()
 logError e = runStdoutLoggingT $ logErrorN $ T.pack $ show e
 
 runUserPort :: Member UserGatewayPort.UserGatewayPort r => Sem (UserPort.UserPort : r) a -> Sem r a
-runUserPort = interpret \case
-  UserPort.SaveUser user -> UserGateway.saveUser user
-  UserPort.SaveNotificationSettings userId notification -> UserGateway.saveNotificationSettings userId notification
+runUserPort = UserGateway.runUserPort UserGateway.createUserPortFunctions
 
 runNotificationPort :: Member NotificationGatewayPort.NotificationGatewayPort r => Sem (NotificationPort.NotificationPort : r) a -> Sem r a
 runNotificationPort = interpret \case

@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE FlexibleContexts #-}
 module Architecture.Polysemy.Controller.UserController2 where
 
 import Domain.User (UnvalidatedUser, NotificationSettings)
@@ -16,7 +14,7 @@ import Architecture.Polysemy.Usecase.SaveUser (execute)
 
 import Control.Monad.Logger (logErrorN, runStdoutLoggingT)
 
-import Polysemy (runM, Member, Embed, Sem, interpret, embed)
+import Polysemy (runM, Member, Embed, Sem, embed)
 import Polysemy.Error (runError)
 import Control.Monad.Reader (ReaderT)
 import qualified Architecture.Polysemy.Usecase.UserPort as UserPort
@@ -48,31 +46,28 @@ run :: NotificationApiSettings -> UnvalidatedUser -> NotificationSettings -> Boo
 run notificationApiSettings user notificationSettings withNotify =
   runM
   . runError
-  . runUserGatewayPort
-  . runUserPort
-  . runNotificationGatewayPort notificationApiSettings
-  . runNotificationPort
+  . UserGatewayPort.runUserGatewayPort createUserGatewayPortFunctions
+  . UserPort.runUserPort UserGateway.createUserPortFunctions
+  . NotificationGatewayPort.runNotificationGatewayPort (createNotificationGatewayPortFunctions notificationApiSettings)
+  . NotificationPort.runNotificationPort NotificationGateway.createNotificationPortFunctions
   $ execute user notificationSettings withNotify
+
+createUserGatewayPortFunctions
+  :: Member (Embed (ReaderT SqlBackend IO)) r
+  => UserGatewayPort.UserGatewayPortFunctions (Sem r)
+createUserGatewayPortFunctions = UserGatewayPort.UserGatewayPortFunctions
+  { saveUser = embed . UserDriver.saveUser
+  , saveNotificationSettings = embed . UserDriver.saveNotificationSettings
+  }
+
+createNotificationGatewayPortFunctions
+  :: Member (Embed (ReaderT SqlBackend IO)) r
+  => NotificationApiSettings
+  -> NotificationGatewayPort.NotificationGatewayPortFunctions (Sem r)
+createNotificationGatewayPortFunctions s = NotificationGatewayPort.NotificationGatewayPortFunctions
+  { sendNotification = embed . NotificationDriver.postMessage s
+  }
 
 -- もっときれいにできる
 logError :: (MonadIO m, Show a) => a -> m ()
 logError e = runStdoutLoggingT $ logErrorN $ T.pack $ show e
-
-runUserPort :: Member UserGatewayPort.UserGatewayPort r => Sem (UserPort.UserPort : r) a -> Sem r a
-runUserPort = UserGateway.runUserPort UserGateway.createUserPortFunctions
-
-runNotificationPort :: Member NotificationGatewayPort.NotificationGatewayPort r => Sem (NotificationPort.NotificationPort : r) a -> Sem r a
-runNotificationPort = interpret \case
-  NotificationPort.SendNotification message -> NotificationGateway.sendNotification message
-
-runUserGatewayPort :: Member (Embed (ReaderT SqlBackend IO)) r => Sem (UserGatewayPort.UserGatewayPort : r) a -> Sem r a
-runUserGatewayPort = interpret \case
-  UserGatewayPort.SaveUser user -> embed $ UserDriver.saveUser user
-  UserGatewayPort.SaveNotificationSettings notification -> embed $ UserDriver.saveNotificationSettings notification
-
-runNotificationGatewayPort
-  :: Member (Embed (ReaderT SqlBackend IO)) r
-  => NotificationApiSettings
-  -> Sem (NotificationGatewayPort.NotificationGatewayPort : r) a -> Sem r a
-runNotificationGatewayPort settings = interpret \case
-  NotificationGatewayPort.SendNotification message -> embed $ NotificationDriver.postMessage settings message

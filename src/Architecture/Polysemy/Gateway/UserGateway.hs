@@ -7,7 +7,7 @@ import qualified Driver.UserDb.Schema as S
 import Domain.User (User(..), UserId(..), UserData(UserData), UserName (UserName), NotificationSettings (..))
 import qualified Architecture.Polysemy.Gateway.UserGatewayPort as Port
 import Prelude hiding (last)
-import Polysemy (Member, Sem, interpret)
+import Polysemy (Member, Sem)
 import Architecture.Polysemy.Usecase.UserPort (UserPortFunctions(..))
 
 saveUser :: (Member Port.UserGatewayPort r) => User -> Sem r ()

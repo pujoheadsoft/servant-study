@@ -1,3 +1,10 @@
+{-
+  run系関数を全部ほかのモジュールに移動したバージョン
+  runを他レイヤーに依存させないようにするために、レコードに定義した関数に処理を依存させている。
+  レコードは然るべきレイヤーで作る。
+  GatewayとUsecaseの関係を、レコードを通して示すことができるが、レコードの定義が必要になり、コードが増える。
+  そのためrun系はControllerにまとめてしまった方がよいかもしれない。
+-}
 module Architecture.Polysemy.Controller.UserController2 where
 
 import Domain.User (UnvalidatedUser, NotificationSettings)

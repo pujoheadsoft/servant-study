@@ -19,25 +19,34 @@ runDBPool = interpret $ \case
     backend <- ask
     embed $ runReaderT action backend
 
-runPoolSql :: Members '[Reader SqlBackend, Embed IO] r => ConnectionPool -> Sem (DB ': r) a -> IO a
+example :: Sem (Reader SqlBackend ': r) String
+example = do
+  backend <- ask
+  pure "Example Result"
+
+runDBAsReader :: Members '[Reader SqlBackend, Embed IO] r => Sem (DB ': r) String -> Sem (Reader SqlBackend ': r) String
+runDBAsReader = reinterpret $ \(RunDB action) -> do
+  backend <- ask
+  embed $ runReaderT action backend
+
+runPoolSql :: Members '[Reader SqlBackend, Embed IO] r => ConnectionPool -> Sem (DB ': r) String -> IO String
 runPoolSql pool sem = do
   let
     -- x = reinterpret (\(RunDB action) -> do
     --         backend <- ask
     --         embed $ runReaderT action backend
     --       ) sem
-    y = runDBPool sem
     backend :: SqlBackend
     backend = undefined
     
-    r :: Sem (Reader SqlBackend : r) a
-    r = undefined
+    r :: Sem (Reader SqlBackend : r) String
+    r = runDBAsReader sem
 
-    ef :: MonadIO m => Sem '[Embed (ReaderT SqlBackend m)] a
+    ef :: MonadIO m => Sem '[Embed (ReaderT SqlBackend m)] String
     ef = runReader backend r
 
   let
-    program :: MonadIO m => ReaderT SqlBackend m a
+    program :: MonadIO m => ReaderT SqlBackend m String
     program = runM ef
   --z <- runM y
 

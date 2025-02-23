@@ -24,8 +24,12 @@ import qualified Driver.UserDb.UserDriver as UserDriver
 import qualified Driver.Api.NotificationApiDriver as NotificationDriver
 import Control.Monad.Reader (ReaderT)
 import Control.Monad.Hefty (type (<|), (:!!), type (~>), interpret, send, runEff, Type,  makeEffectF, translate)
-import Control.Monad.Hefty.Except (runThrow, runThrowIO)
+import Control.Monad.Hefty.Except (runThrow, runThrowIO, throw)
 import Api.Configuration (NotificationApiSettings)
+
+-- もっときれいにできる
+logError :: (MonadIO m, Show a) => a -> m ()
+logError e = runStdoutLoggingT $ logErrorN $ T.pack $ show e
 
 -- runSqlPoolを直接使う版
 handleSaveUserRequest :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> Handler String
@@ -88,7 +92,11 @@ makeEffectF [''RunSql]
 -- これだとRunSqlが複数あった場合、別々のトランザクションになってしまう
 runRunSql :: (IO <| r) => ConnectionPool -> eh :!! RunSql IO ': r ~> eh :!! r
 runRunSql pool = interpret \case
-  RunSql a -> liftIO $ runSqlPool a pool
+  RunSql a -> liftIO do
+    putStrLn "トランザクション開始"
+    r <- runSqlPool a pool
+    putStrLn "トランザクション終了"
+    pure r
 
 handleSaveUserRequest2 :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> Handler String
 handleSaveUserRequest2 apiSetting pool user notificationSettings withNotify = do
@@ -110,6 +118,7 @@ run2 apiSetting pool user notification withNotify  = do
   . runThrowIO @EmailError  
   . runRunSql pool
   . runGatewayPort2
+  . runGatewayPort3
   . runUserPort
   . runNotificationGatewayPort2 apiSetting
   . runNotificationPort
@@ -121,7 +130,22 @@ runGatewayPort2 = translate go
     go :: UserGatewayPort.UserGatewayPort a -> RunSql IO a
     go = \case
       UserGatewayPort.SaveUser user -> RunSql $ UserDriver.saveUser @IO user
-      UserGatewayPort.SaveNotificationSettings notification -> RunSql $ UserDriver.saveNotificationSettings @IO notification
+      UserGatewayPort.SaveNotificationSettings notification -> RunSql do
+        liftIO $ putStrLn "何もしないよ"
+        pure ()
+
+runGatewayPort3 :: (RunSql IO <| ef) => eh :!! UserGatewayPort.UserGatewayPort ': ef ~> eh :!! ef
+runGatewayPort3 = translate go
+  where
+    go :: UserGatewayPort.UserGatewayPort a -> RunSql IO a
+    go = \case
+      UserGatewayPort.SaveUser user -> RunSql do
+        liftIO $ putStrLn "何もしないよ"
+        pure ()
+      UserGatewayPort.SaveNotificationSettings notification -> RunSql do
+        liftIO $ putStrLn "これから例外を投げる"
+        error "エラー"
+        pure ()
 
 runNotificationGatewayPort2
   :: (IO <| r)
@@ -131,6 +155,3 @@ runNotificationGatewayPort2 apiSetting = interpret \case
   NotificationGatewayPort.SendNotification message -> NotificationDriver.postMessage apiSetting message
 
 
--- もっときれいにできる
-logError :: (MonadIO m, Show a) => a -> m ()
-logError e = runStdoutLoggingT $ logErrorN $ T.pack $ show e

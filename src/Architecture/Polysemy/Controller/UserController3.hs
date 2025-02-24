@@ -1,9 +1,10 @@
 module Architecture.Polysemy.Controller.UserController3 where
 
 import Control.Monad.Reader (ReaderT (runReaderT, ReaderT))
-import Database.Persist.Postgresql (SqlBackend, runSqlPool)
+import qualified Control.Monad.Reader as R
+import Database.Persist.Postgresql (SqlBackend, runSqlPool, Sql)
 import Polysemy (makeSem, Members, Embed (Embed), Sem, interpret, embed, Member, runM, subsume, reinterpret, run)
-import Polysemy.Reader (Reader, ask, runReader)
+import Polysemy.Reader (Reader, ask, runReader, inputToReader)
 import Database.Persist.Sql (ConnectionPool)
 import Data.Effect.Unlift (UnliftIO)
 import Control.Monad.IO.Class (MonadIO)
@@ -19,45 +20,22 @@ runDBPool = interpret $ \case
     backend <- ask
     embed $ runReaderT action backend
 
-example :: Sem (Reader SqlBackend ': r) String
-example = do
-  backend <- ask
-  pure "Example Result"
+yyy :: Sem '[DB] a -> ReaderT SqlBackend IO a
+yyy sem = runM $ reinterpret (\(RunDB action) -> embed action) sem
 
-runDBAsReader :: Members '[Reader SqlBackend, Embed IO] r => Sem (DB ': r) String -> Sem (Reader SqlBackend ': r) String
-runDBAsReader = reinterpret $ \(RunDB action) -> do
-  backend <- ask
-  embed $ runReaderT action backend
-
-runPoolSql :: Members '[Reader SqlBackend, Embed IO] r => ConnectionPool -> Sem (DB ': r) String -> IO String
+runPoolSql :: Member (Embed IO) r => ConnectionPool -> Sem '[DB] a -> Sem r a
 runPoolSql pool sem = do
   let
-    -- x = reinterpret (\(RunDB action) -> do
-    --         backend <- ask
-    --         embed $ runReaderT action backend
-    --       ) sem
-    backend :: SqlBackend
-    backend = undefined
-    
-    r :: Sem (Reader SqlBackend : r) String
-    r = runDBAsReader sem
+    program = yyy sem
+  embed $ runSqlPool program pool
 
-    ef :: MonadIO m => Sem '[Embed (ReaderT SqlBackend m)] String
-    ef = runReader backend r
-
-  let
-    program :: MonadIO m => ReaderT SqlBackend m String
-    program = runM ef
-  --z <- runM y
-
-  runSqlPool program pool
-
-
-
-
-
--- main :: IO ()
--- main = do
---   pool <- createSqlPool
---   runPoolSql pool $ do
---     runDB $ insert_ $ MyEntity "Test" -- DBエフェクトの処理
+main2 :: IO ()
+main2 = do
+  let 
+    pool :: ConnectionPool
+    pool = undefined
+  _ <- runM . runPoolSql pool $ do
+    runDB $ pure "a"
+    runDB $ pure ()
+    runDB $ pure 10
+  pure ()

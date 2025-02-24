@@ -23,9 +23,10 @@ import qualified Architecture.Heftia.Gateway.NotificationGatewayPort as Notifica
 import qualified Driver.UserDb.UserDriver as UserDriver
 import qualified Driver.Api.NotificationApiDriver as NotificationDriver
 import Control.Monad.Reader (ReaderT)
-import Control.Monad.Hefty (type (<|), (:!!), type (~>), interpret, send, runEff, Type,  makeEffectF, translate, reinterpret, Eff, type (!!), type (+))
-import Control.Monad.Hefty.Except (runThrow, runThrowIO, throw)
+import Control.Monad.Hefty (type (<|), (:!!), type (~>), interpret, send, runEff,  makeEffectF, translate)
+import Control.Monad.Hefty.Except (runThrowIO)
 import Api.Configuration (NotificationApiSettings)
+import Data.Functor (($>))
 
 -- もっときれいにできる
 logError :: (MonadIO m, Show a) => a -> m ()
@@ -36,11 +37,9 @@ data RunSql a where
   RunSql :: ReaderT SqlBackend IO a -> RunSql a
 makeEffectF [''RunSql]
 
-handleSaveUserRequest2 :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> Handler String
-handleSaveUserRequest2 apiSetting pool user notificationSettings withNotify = do
-  (do
-    liftIO $ run2 apiSetting pool user notificationSettings withNotify
-    pure "OK")
+handleSaveUserRequest :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> Handler String
+handleSaveUserRequest apiSetting pool user notificationSettings withNotify = do
+  liftIO $ run apiSetting pool user notificationSettings withNotify $> "OK"
   `catches`
   [ Ex.Handler $ \(InvalidEmailFormat e) -> do
     logError e
@@ -50,17 +49,16 @@ handleSaveUserRequest2 apiSetting pool user notificationSettings withNotify = do
     throwError $ err500 { errBody = pack $ show e }
   ]
 
-run2 :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> IO ()
-run2 apiSetting pool user notification withNotify  = do
+run :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> IO ()
+run apiSetting pool user notification withNotify  = do
     runEff
   . runPoolSql pool
   . runThrowIO @EmailError  
-  . runGatewayPort2
+  . runGatewayPort
   . runUserPort
-  . runNotificationGatewayPort2 apiSetting
+  . runNotificationGatewayPort apiSetting
   . runNotificationPort
   $ execute user notification withNotify
-
 
 runUserPort :: (UserGatewayPort.UserGatewayPort <| r) => eh :!! UserPort.UserPort ': r ~> eh :!! r
 runUserPort = interpret \case
@@ -73,18 +71,18 @@ runNotificationPort
 runNotificationPort = interpret \case
   NotificationPort.SendNotification message -> NotificationGateway.sendNotification message
 
-runGatewayPort2 :: (RunSql <| ef) => eh :!! UserGatewayPort.UserGatewayPort ': ef ~> eh :!! ef
-runGatewayPort2 = translate go
+runGatewayPort :: (RunSql <| ef) => eh :!! UserGatewayPort.UserGatewayPort ': ef ~> eh :!! ef
+runGatewayPort = translate go
   where
     go :: UserGatewayPort.UserGatewayPort a -> RunSql a
     go = \case
       UserGatewayPort.SaveUser user -> RunSql $ UserDriver.saveUser @IO user
       UserGatewayPort.SaveNotificationSettings notification -> RunSql $ UserDriver.saveNotificationSettings @IO notification
 
-runNotificationGatewayPort2
+runNotificationGatewayPort
   :: IO <| r => NotificationApiSettings
   -> eh :!! NotificationGatewayPort.NotificationGatewayPort ': r ~> eh :!! r
-runNotificationGatewayPort2 apiSetting = interpret \case
+runNotificationGatewayPort apiSetting = interpret \case
   NotificationGatewayPort.SendNotification message -> NotificationDriver.postMessage apiSetting message
 
 runPoolSql :: IO <| r => ConnectionPool -> eh :!! RunSql ': r ~> eh :!! r

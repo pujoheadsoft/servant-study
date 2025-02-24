@@ -88,11 +88,11 @@ runNotificationGatewayPort2 apiSetting = interpret \case
   NotificationGatewayPort.SendNotification message -> NotificationDriver.postMessage apiSetting message
 
 -- 中身を取り出すだけ
-handleDb :: '[] :!! RunSql ': r ~> '[] :!! (ReaderT SqlBackend IO ': r)
-handleDb sem = reinterpret (\(RunSql action) -> send action) sem
+handleDb :: eh :!! RunSql ': r ~> ReaderT SqlBackend IO
+handleDb sem = undefined -- runEff $ reinterpret (\(RunSql action) -> send action) sem
 
 runPoolSql :: IO <| r => ConnectionPool -> eh :!! RunSql ': r ~> eh :!! r
 runPoolSql pool sem = do
   let
-    program = runEff $ handleDb undefined
+    program = handleDb sem
   send $ runSqlPool program pool

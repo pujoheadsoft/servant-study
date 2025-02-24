@@ -30,6 +30,7 @@ library
       Api.SystemApi
       Api.UserApi
       Architecture.Heftia.Controller.UserController
+      Architecture.Heftia.Controller.UserController2
       Architecture.Heftia.Gateway.NotificationGateway
       Architecture.Heftia.Gateway.NotificationGatewayPort
       Architecture.Heftia.Gateway.UserGateway

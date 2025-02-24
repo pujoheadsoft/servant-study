@@ -118,7 +118,6 @@ run2 apiSetting pool user notification withNotify  = do
   . runThrowIO @EmailError  
   . runRunSql pool
   . runGatewayPort2
-  . runGatewayPort3
   . runUserPort
   . runNotificationGatewayPort2 apiSetting
   . runNotificationPort
@@ -130,22 +129,7 @@ runGatewayPort2 = translate go
     go :: UserGatewayPort.UserGatewayPort a -> RunSql IO a
     go = \case
       UserGatewayPort.SaveUser user -> RunSql $ UserDriver.saveUser @IO user
-      UserGatewayPort.SaveNotificationSettings notification -> RunSql do
-        liftIO $ putStrLn "何もしないよ"
-        pure ()
-
-runGatewayPort3 :: (RunSql IO <| ef) => eh :!! UserGatewayPort.UserGatewayPort ': ef ~> eh :!! ef
-runGatewayPort3 = translate go
-  where
-    go :: UserGatewayPort.UserGatewayPort a -> RunSql IO a
-    go = \case
-      UserGatewayPort.SaveUser user -> RunSql do
-        liftIO $ putStrLn "何もしないよ"
-        pure ()
-      UserGatewayPort.SaveNotificationSettings notification -> RunSql do
-        liftIO $ putStrLn "これから例外を投げる"
-        error "エラー"
-        pure ()
+      UserGatewayPort.SaveNotificationSettings notification -> RunSql $ UserDriver.saveNotificationSettings @IO notification
 
 runNotificationGatewayPort2
   :: (IO <| r)

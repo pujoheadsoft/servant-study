@@ -91,7 +91,7 @@ runNotificationGatewayPort2 apiSetting = interpret \case
 handleDb :: '[] :!! RunSql ': r ~> '[] :!! (ReaderT SqlBackend IO ': r)
 handleDb sem = reinterpret (\(RunSql action) -> send action) sem
 
-runPoolSql :: IO <| r => ConnectionPool -> '[] :!! RunSql ': r ~> '[] :!! r
+runPoolSql :: IO <| r => ConnectionPool -> eh :!! RunSql ': r ~> eh :!! r
 runPoolSql pool sem = do
   let
     program = runEff $ handleDb undefined

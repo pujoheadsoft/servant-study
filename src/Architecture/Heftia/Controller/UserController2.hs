@@ -23,10 +23,9 @@ import qualified Architecture.Heftia.Gateway.NotificationGatewayPort as Notifica
 import qualified Driver.UserDb.UserDriver as UserDriver
 import qualified Driver.Api.NotificationApiDriver as NotificationDriver
 import Control.Monad.Reader (ReaderT)
-import Control.Monad.Hefty (type (<|), (:!!), type (~>), interpret, send, runEff,  makeEffectF, translate)
-import Control.Monad.Hefty.Except (runThrowIO)
+import Control.Monad.Hefty (type (<|), (:!!), type (~>), interpret, send, runEff,  makeEffectF, translate, transform)
+import Control.Monad.Hefty.Except (runThrow)
 import Api.Configuration (NotificationApiSettings)
-import Data.Functor (($>))
 
 -- もっときれいにできる
 logError :: (MonadIO m, Show a) => a -> m ()
@@ -39,7 +38,9 @@ makeEffectF [''RunSql]
 
 handleSaveUserRequest :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> Handler String
 handleSaveUserRequest apiSetting pool user notificationSettings withNotify = do
-  liftIO $ run apiSetting pool user notificationSettings withNotify $> "OK"
+  liftIO $ run apiSetting pool user notificationSettings withNotify >>= either
+    Ex.throw -- 外側のハンドラに任せる
+    \_ -> pure "OK"
   `catches`
   [ Ex.Handler $ \(InvalidEmailFormat e) -> do
     logError e
@@ -49,11 +50,11 @@ handleSaveUserRequest apiSetting pool user notificationSettings withNotify = do
     throwError $ err500 { errBody = pack $ show e }
   ]
 
-run :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> IO ()
+run :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> IO (Either EmailError ())
 run apiSetting pool user notification withNotify  = do
     runEff
   . runPoolSql pool
-  . runThrowIO @EmailError  
+  . runThrow @EmailError  
   . runGatewayPort
   . runUserPort
   . runNotificationGatewayPort apiSetting
@@ -71,7 +72,7 @@ runNotificationPort
 runNotificationPort = interpret \case
   NotificationPort.SendNotification message -> NotificationGateway.sendNotification message
 
-runGatewayPort :: (RunSql <| ef) => eh :!! UserGatewayPort.UserGatewayPort ': ef ~> eh :!! ef
+runGatewayPort :: RunSql <| ef => eh :!! UserGatewayPort.UserGatewayPort ': ef ~> eh :!! ef
 runGatewayPort = translate go
   where
     go :: UserGatewayPort.UserGatewayPort a -> RunSql a
@@ -80,13 +81,31 @@ runGatewayPort = translate go
       UserGatewayPort.SaveNotificationSettings notification -> RunSql $ UserDriver.saveNotificationSettings @IO notification
 
 runNotificationGatewayPort
-  :: IO <| r => NotificationApiSettings
-  -> eh :!! NotificationGatewayPort.NotificationGatewayPort ': r ~> eh :!! r
-runNotificationGatewayPort apiSetting = interpret \case
-  NotificationGatewayPort.SendNotification message -> NotificationDriver.postMessage apiSetting message
+  :: RunSql <| ef
+  => NotificationApiSettings
+  -> eh :!! NotificationGatewayPort.NotificationGatewayPort ': ef ~> eh :!! ef
+runNotificationGatewayPort apiSetting = translate go
+  where
+    go :: NotificationGatewayPort.NotificationGatewayPort a -> RunSql a
+    go = \case
+      NotificationGatewayPort.SendNotification message -> RunSql $ NotificationDriver.postMessage apiSetting message
 
-runPoolSql :: IO <| r => ConnectionPool -> eh :!! RunSql ': r ~> eh :!! r
-runPoolSql pool = interpret \case
+extract :: '[] :!! '[RunSql] ~> ReaderT SqlBackend IO
+extract = runEff . transform (\(RunSql action) -> action)
+
+runPoolSql :: IO <| ef => ConnectionPool -> '[] :!! '[RunSql] ~> '[] :!! ef
+runPoolSql pool ef = do
+  let
+    program = extract ef
+  liftIO $ putStrLn "トランザクション開始"
+  let x = runSqlPool program pool
+  liftIO $ putStrLn "トランザクション終了"
+  send x
+
+-- ↓の方がシンプルな実装だし汎用性もあるが、こっちだとDBアクセスするたびにトランザクションが開始されてしまう
+
+runPoolSql2 :: IO <| ef => ConnectionPool -> eh :!! RunSql ': ef ~> eh :!! ef
+runPoolSql2 pool = interpret \case
   RunSql action -> do
     liftIO $ putStrLn "トランザクション開始"
     let x = runSqlPool action pool

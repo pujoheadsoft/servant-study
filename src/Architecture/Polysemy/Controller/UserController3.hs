@@ -46,7 +46,10 @@ runPoolSql :: Member (Embed IO) r => ConnectionPool -> Sem '[DB] a -> Sem r a
 runPoolSql pool sem = do
   let
     program = handleDb sem
-  embed $ runSqlPool program pool
+  liftIO $ putStrLn "トランザクション開始"
+  let x = runSqlPool program pool
+  liftIO $ putStrLn "トランザクション終了"
+  embed x
 
 handleSaveUserRequest :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> Handler String
 handleSaveUserRequest notificationApiSettings pool user notificationSettings withNotify = do

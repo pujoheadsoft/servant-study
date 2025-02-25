@@ -87,4 +87,8 @@ runNotificationGatewayPort apiSetting = interpret \case
 
 runPoolSql :: IO <| r => ConnectionPool -> eh :!! RunSql ': r ~> eh :!! r
 runPoolSql pool = interpret \case
-  RunSql action -> send $ runSqlPool action pool
+  RunSql action -> do
+    liftIO $ putStrLn "トランザクション開始"
+    let x = runSqlPool action pool
+    liftIO $ putStrLn "トランザクション終了"
+    send x

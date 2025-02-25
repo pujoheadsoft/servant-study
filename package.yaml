@@ -74,7 +74,7 @@ default-extensions:
 
 library:
   source-dirs: src
-  default-language: GHC2021
+  language: GHC2021
 
 executables:
   servant-study-exe:

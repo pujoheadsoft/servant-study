@@ -16,6 +16,7 @@ import qualified Architecture.TaglessFinal.Controller.UserController as TaglessF
 import qualified Architecture.Polysemy.Controller.UserController as Polysemy
 import qualified Architecture.Polysemy.Controller.UserController3 as Polysemy3
 import qualified Architecture.Heftia.Controller.UserController as Heftia
+import qualified Architecture.Heftia.Controller.UserController2 as Heftia2
 import Control.Exception (throw)
 import Data.Maybe (fromMaybe)
 import Api.Configuration (ApiSettings(..))

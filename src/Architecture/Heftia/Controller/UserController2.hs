@@ -52,8 +52,7 @@ handleSaveUserRequest apiSetting pool user notificationSettings withNotify = do
 
 run :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> IO (Either EmailError ())
 run apiSetting pool user notification withNotify  = do
-    runEff
-  . runPoolSqlWithTransaction pool
+    runEffPoolSqlWithTransaction pool
   . runThrow @EmailError  
   . runGatewayPort
   . runUserPort

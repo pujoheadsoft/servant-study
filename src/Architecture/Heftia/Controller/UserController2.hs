@@ -23,7 +23,7 @@ import qualified Architecture.Heftia.Gateway.NotificationGatewayPort as Notifica
 import qualified Driver.UserDb.UserDriver as UserDriver
 import qualified Driver.Api.NotificationApiDriver as NotificationDriver
 import Control.Monad.Reader (ReaderT)
-import Control.Monad.Hefty (type (<|), (:!!), type (~>), interpret, send, runEff,  makeEffectF, translate, transform)
+import Control.Monad.Hefty (type (<|), (:!!), type (~>), interpret, send, runEff,  makeEffectF, translate, transform, reinterpret)
 import Control.Monad.Hefty.Except (runThrow)
 import Api.Configuration (NotificationApiSettings)
 
@@ -53,7 +53,7 @@ handleSaveUserRequest apiSetting pool user notificationSettings withNotify = do
 run :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> IO (Either EmailError ())
 run apiSetting pool user notification withNotify  = do
     runEff
-  . runPoolSql pool
+  . runPoolSqlWithTransaction pool
   . runThrow @EmailError  
   . runGatewayPort
   . runUserPort
@@ -93,8 +93,8 @@ runNotificationGatewayPort apiSetting = translate go
 extract :: '[] :!! '[RunSql] ~> ReaderT SqlBackend IO
 extract = runEff . transform (\(RunSql action) -> action)
 
-runPoolSql :: IO <| ef => ConnectionPool -> '[] :!! '[RunSql] ~> '[] :!! ef
-runPoolSql pool ef = do
+runPoolSqlWithTransaction :: IO <| ef => ConnectionPool -> '[] :!! '[RunSql] ~> '[] :!! ef
+runPoolSqlWithTransaction pool ef = do
   let
     program = extract ef
   liftIO $ putStrLn "トランザクション開始"
@@ -102,10 +102,12 @@ runPoolSql pool ef = do
   liftIO $ putStrLn "トランザクション終了"
   send x
 
--- ↓の方がシンプルな実装だし汎用性もあるが、こっちだとDBアクセスするたびにトランザクションが開始されてしまう
+runEffPoolSqlWithTransaction :: MonadIO m => ConnectionPool -> '[] :!! '[RunSql] ~> m
+runEffPoolSqlWithTransaction pool ef = liftIO . runEff $ runPoolSqlWithTransaction pool ef
 
-runPoolSql2 :: IO <| ef => ConnectionPool -> eh :!! RunSql ': ef ~> eh :!! ef
-runPoolSql2 pool = interpret \case
+-- 
+runPoolSql :: IO <| ef => ConnectionPool -> eh :!! RunSql ': ef ~> eh :!! ef
+runPoolSql pool = interpret \case
   RunSql action -> do
     liftIO $ putStrLn "トランザクション開始"
     let x = runSqlPool action pool

@@ -111,6 +111,7 @@ library
     , req
     , safe-exceptions
     , servant-server
+    , string-interpolate
     , text
     , wai
     , warp
@@ -162,6 +163,7 @@ executable servant-study-exe
     , safe-exceptions
     , servant-server
     , servant-study
+    , string-interpolate
     , text
     , wai
     , warp
@@ -220,6 +222,7 @@ test-suite servant-study-test
     , safe-exceptions
     , servant-server
     , servant-study
+    , string-interpolate
     , text
     , wai
     , warp

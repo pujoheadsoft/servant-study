@@ -41,6 +41,7 @@ dependencies:
 - polysemy-plugin
 - req
 - modern-uri
+- string-interpolate
 
 ghc-options:
 - -Wall

@@ -1,4 +1,4 @@
-module Driver.Api.NotificationApiDriver where
+module Driver.Api.NotificationApiDriverReq where
 
 import Network.HTTP.Req
 import Data.Aeson ((.=), object, ToJSON, FromJSON)

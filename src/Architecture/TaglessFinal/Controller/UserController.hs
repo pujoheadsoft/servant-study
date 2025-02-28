@@ -24,7 +24,7 @@ import qualified Architecture.TaglessFinal.Gateway.NotificationGatewayPort as No
 import qualified Architecture.TaglessFinal.Usecase.UserPort as UserPort
 import qualified Architecture.TaglessFinal.Usecase.NotificationPort as NotificationPort
 import qualified Driver.UserDb.UserDriver as UserDriver
-import qualified Driver.Api.NotificationApiDriver as NotificationDriver
+import qualified Driver.Api.NotificationApiDriverReq as NotificationDriver
 import Api.Configuration (NotificationApiSettings)
 import Control.Monad.Trans (lift)
 

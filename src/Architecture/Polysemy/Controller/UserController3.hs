@@ -29,7 +29,7 @@ import qualified Architecture.Polysemy.Gateway.NotificationGateway as Notificati
 import qualified Architecture.Polysemy.Gateway.UserGatewayPort as UserGatewayPort
 import qualified Architecture.Polysemy.Gateway.NotificationGatewayPort as NotificationGatewayPort
 import qualified Driver.UserDb.UserDriver as UserDriver
-import qualified Driver.Api.NotificationApiDriver as NotificationDriver
+import qualified Driver.Api.NotificationApiDriverReq as NotificationDriver
 import Api.Configuration (NotificationApiSettings)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 

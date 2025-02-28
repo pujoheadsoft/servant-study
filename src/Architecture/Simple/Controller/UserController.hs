@@ -16,7 +16,8 @@ import Control.Monad.IO.Class (liftIO, MonadIO)
 import qualified Architecture.Simple.Gateway.UserGateway as UserGateway
 import qualified Architecture.Simple.Gateway.NotificationGateway as NotificationGateway
 import qualified Driver.UserDb.UserDriver as UserDriver
-import qualified Driver.Api.NotificationApiDriver as NotificationApiDriver
+import qualified Driver.Api.NotificationApiDriverReq as NotificationApiDriver
+import qualified Driver.Api.NotificationApiDriverWreq as NotificationApiDriverWreq
 import Control.Monad.Logger (logErrorN, runStdoutLoggingT)
 import Api.Configuration (NotificationApiSettings)
 
@@ -35,7 +36,7 @@ handleSaveUserRequest apiSetting pool user notificationSettings withNotify = do
         saveNotificationSettings = UserDriver.saveNotificationSettings
       }
       notificationGateway = NotificationGateway.NotificationGatewayPort {
-        sendNotification = NotificationApiDriver.postMessage apiSetting
+        sendNotification = NotificationApiDriverWreq.postMessage apiSetting
       }
       userPort = UserPort {
         saveUser = UserGateway.saveUser userGatewayPort,

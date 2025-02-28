@@ -65,7 +65,8 @@ library
       Domain.Email
       Domain.Message
       Domain.User
-      Driver.Api.NotificationApiDriver
+      Driver.Api.NotificationApiDriverReq
+      Driver.Api.NotificationApiDriverWreq
       Driver.UserDb.Schema
       Driver.UserDb.UserDriver
       Lib
@@ -115,6 +116,7 @@ library
     , text
     , wai
     , warp
+    , wreq
     , yaml
   default-language: GHC2021
 
@@ -167,6 +169,7 @@ executable servant-study-exe
     , text
     , wai
     , warp
+    , wreq
     , yaml
   default-language: Haskell2010
 
@@ -226,5 +229,6 @@ test-suite servant-study-test
     , text
     , wai
     , warp
+    , wreq
     , yaml
   default-language: Haskell2010

@@ -29,6 +29,7 @@ library
       Api.Router
       Api.SystemApi
       Api.UserApi
+      Architecture.Heftia.Common.Logger
       Architecture.Heftia.Controller.UserController
       Architecture.Heftia.Controller.UserController2
       Architecture.Heftia.Gateway.NotificationGateway

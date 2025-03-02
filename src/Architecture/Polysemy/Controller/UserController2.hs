@@ -39,7 +39,7 @@ handleSaveUserRequest notificationApiSettings pool user notificationSettings wit
   liftIO $ flip runSqlPool pool do
     run notificationApiSettings user notificationSettings withNotify >>= either
       Ex.throw -- 外側のハンドラに任せる
-      \_ -> pure "OK"
+      (const $ pure "OK")
   `catches`
   [ Ex.Handler $ \(InvalidEmailFormat e) -> do
     logError e

@@ -55,7 +55,7 @@ handleSaveUserRequest :: NotificationApiSettings -> ConnectionPool -> Unvalidate
 handleSaveUserRequest notificationApiSettings pool user notificationSettings withNotify = do
   liftIO $ run pool notificationApiSettings user notificationSettings withNotify >>= either
       Ex.throw -- 外側のハンドラに任せる
-      \_ -> pure "OK"
+      (const $ pure "OK")
   `catches`
   [ Ex.Handler $ \(InvalidEmailFormat e) -> do
     logError e

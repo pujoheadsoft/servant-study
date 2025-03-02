@@ -1,3 +1,6 @@
+{-
+  トランザクションに乗せたSQLの実行をエフェクトで表現する版
+-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 module Architecture.Heftia.Controller.UserController2 where
 
@@ -23,7 +26,7 @@ import qualified Architecture.Heftia.Gateway.NotificationGatewayPort as Notifica
 import qualified Driver.UserDb.UserDriver as UserDriver
 import qualified Driver.Api.NotificationApiDriverReq as NotificationDriver
 import Control.Monad.Reader (ReaderT)
-import Control.Monad.Hefty (type (<|), (:!!), type (~>), interpret, send, runEff,  makeEffectF, translate, transform, reinterpret)
+import Control.Monad.Hefty (type (<|), (:!!), type (~>), interpret, send, runEff,  makeEffectF, translate, transform)
 import Control.Monad.Hefty.Except (runThrow)
 import Api.Configuration (NotificationApiSettings)
 
@@ -36,11 +39,17 @@ data RunSql a where
   RunSql :: ReaderT SqlBackend IO a -> RunSql a
 makeEffectF [''RunSql]
 
-handleSaveUserRequest :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> Handler String
+handleSaveUserRequest
+  :: NotificationApiSettings
+  -> ConnectionPool
+  -> UnvalidatedUser
+  -> NotificationSettings
+  -> Bool
+  -> Handler String
 handleSaveUserRequest apiSetting pool user notificationSettings withNotify = do
   liftIO $ run apiSetting pool user notificationSettings withNotify >>= either
     Ex.throw -- 外側のハンドラに任せる
-    \_ -> pure "OK"
+    (const $ pure "OK")
   `catches`
   [ Ex.Handler $ \(InvalidEmailFormat e) -> do
     logError e
@@ -50,7 +59,14 @@ handleSaveUserRequest apiSetting pool user notificationSettings withNotify = do
     throwError $ err500 { errBody = pack $ show e }
   ]
 
-run :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> IO (Either EmailError ())
+run
+  :: MonadIO m
+  => NotificationApiSettings
+  -> ConnectionPool
+  -> UnvalidatedUser
+  -> NotificationSettings
+  -> Bool
+  -> m (Either EmailError ())
 run apiSetting pool user notification withNotify  = do
     runEffPoolSqlWithTransaction pool
   . runThrow @EmailError  
@@ -92,6 +108,11 @@ runNotificationGatewayPort apiSetting = translate go
 extract :: '[] :!! '[RunSql] ~> ReaderT SqlBackend IO
 extract = runEff . transform (\(RunSql action) -> action)
 
+-- トランザクション上でRunSqlを解釈し実行する
+-- ReaderT SqlBackend IOをまとめて取り出すため、エフェクトは高階も一階もRunSql以外は解釈済みである必要がある
+runEffPoolSqlWithTransaction :: MonadIO m => ConnectionPool -> '[] :!! '[RunSql] ~> m
+runEffPoolSqlWithTransaction pool ef = liftIO . runEff $ runPoolSqlWithTransaction pool ef
+
 runPoolSqlWithTransaction :: IO <| ef => ConnectionPool -> '[] :!! '[RunSql] ~> '[] :!! ef
 runPoolSqlWithTransaction pool ef = do
   let
@@ -101,10 +122,9 @@ runPoolSqlWithTransaction pool ef = do
   liftIO $ putStrLn "トランザクション終了"
   send x
 
-runEffPoolSqlWithTransaction :: MonadIO m => ConnectionPool -> '[] :!! '[RunSql] ~> m
-runEffPoolSqlWithTransaction pool ef = liftIO . runEff $ runPoolSqlWithTransaction pool ef
-
--- 
+-- RunSqlを解釈し実行する
+-- どこでも解釈できるが、RunSqlエフェクトの数だけトランザクションは開始される
+-- 同じトランザクションに乗せなくてよいならば、こちらでも問題ない
 runPoolSql :: IO <| ef => ConnectionPool -> eh :!! RunSql ': ef ~> eh :!! ef
 runPoolSql pool = interpret \case
   RunSql action -> do

@@ -10,16 +10,14 @@ import Architecture.Simple.Usecase.NotificationPort (NotificationPort(..))
 import Control.Exception.Safe (catches)
 import qualified Control.Exception.Safe as Ex 
 import Data.ByteString.Lazy.Char8 (pack)
-import qualified Data.Text as T
 import Database.Persist.Postgresql (runSqlPool, ConnectionPool)
-import Control.Monad.IO.Class (liftIO, MonadIO)
+import Control.Monad.IO.Class (liftIO)
 import qualified Architecture.Simple.Gateway.UserGateway as UserGateway
 import qualified Architecture.Simple.Gateway.NotificationGateway as NotificationGateway
 import qualified Driver.UserDb.UserDriver as UserDriver
-import qualified Driver.Api.NotificationApiDriverReq as NotificationApiDriver
 import qualified Driver.Api.NotificationApiDriverWreq as NotificationApiDriverWreq
-import Control.Monad.Logger (logErrorN, runStdoutLoggingT)
 import Api.Configuration (NotificationApiSettings)
+import Common.Logger (logError)
 
 handleSaveUserRequest
   :: NotificationApiSettings
@@ -55,8 +53,3 @@ handleSaveUserRequest apiSetting pool user notificationSettings withNotify = do
     logError e
     throwError $ err500 { errBody = pack $ show e }
   ]
-  
-
--- もっときれいにできる
-logError :: (MonadIO m, Show a) => a -> m ()
-logError e = runStdoutLoggingT $ logErrorN $ T.pack $ show e

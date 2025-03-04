@@ -9,12 +9,9 @@ import Control.Exception (SomeException(..))
 import Control.Exception.Safe (catches)
 import qualified Control.Exception.Safe as Ex
 import Data.ByteString.Lazy.Char8 (pack)
-import qualified Data.Text as T
 import Database.Persist.Postgresql (runSqlPool, ConnectionPool, SqlBackend)
-import Control.Monad.IO.Class (liftIO, MonadIO)
+import Control.Monad.IO.Class (liftIO)
 import Architecture.Heftia.Usecase.SaveUser (execute)
-
-import Control.Monad.Logger (logErrorN, runStdoutLoggingT)
 import qualified Architecture.Heftia.Usecase.UserPort as UserPort
 import qualified Architecture.Heftia.Gateway.UserGateway as UserGateway
 import qualified Architecture.Heftia.Gateway.UserGatewayPort as UserGatewayPort
@@ -27,10 +24,7 @@ import Control.Monad.Reader (ReaderT)
 import Control.Monad.Hefty (type (<|), (:!!), type (~>), interpret, send, runEff, translate)
 import Control.Monad.Hefty.Except (runThrow)
 import Api.Configuration (NotificationApiSettings)
-
--- もっときれいにできる
-logError :: (MonadIO m, Show a) => a -> m ()
-logError e = runStdoutLoggingT $ logErrorN $ T.pack $ show e
+import Common.Logger (logError)
 
 handleSaveUserRequest :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> Handler String
 handleSaveUserRequest apiSetting pool user notificationSettings withNotify = do

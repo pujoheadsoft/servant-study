@@ -63,6 +63,7 @@ library
       Architecture.TaglessFinal.Usecase.NotificationPort
       Architecture.TaglessFinal.Usecase.SaveUser
       Architecture.TaglessFinal.Usecase.UserPort
+      Common.Logger
       Domain.Email
       Domain.Message
       Domain.User

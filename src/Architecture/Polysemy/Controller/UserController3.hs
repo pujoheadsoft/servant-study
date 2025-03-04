@@ -8,7 +8,6 @@ import Control.Monad.Reader (ReaderT)
 import Database.Persist.Postgresql (SqlBackend, runSqlPool)
 import Polysemy (makeSem, Sem, interpret, embed, Member, runM, reinterpret, Embed)
 import Database.Persist.Sql (ConnectionPool)
-
 import Domain.User (UnvalidatedUser, NotificationSettings)
 import Domain.Email (EmailError(InvalidEmailFormat))
 import Servant (Handler, ServerError (errBody), throwError, err400, err500)
@@ -16,11 +15,7 @@ import Control.Exception (SomeException(..))
 import Control.Exception.Safe (catches)
 import qualified Control.Exception.Safe as Ex
 import Data.ByteString.Lazy.Char8 (pack)
-import qualified Data.Text as T
 import Architecture.Polysemy.Usecase.SaveUser (execute)
-
-import Control.Monad.Logger (logErrorN, runStdoutLoggingT)
-
 import Polysemy.Error (runError)
 import qualified Architecture.Polysemy.Usecase.UserPort as UserPort
 import qualified Architecture.Polysemy.Usecase.NotificationPort as NotificationPort
@@ -31,7 +26,9 @@ import qualified Architecture.Polysemy.Gateway.NotificationGatewayPort as Notifi
 import qualified Driver.UserDb.UserDriver as UserDriver
 import qualified Driver.Api.NotificationApiDriverReq as NotificationDriver
 import Api.Configuration (NotificationApiSettings)
-import Control.Monad.IO.Class (MonadIO, liftIO)
+import Control.Monad.IO.Class (liftIO)
+import Common.Logger (logError)
+
 
 data DB m a where
   RunDB :: ReaderT SqlBackend IO a -> DB m a
@@ -75,10 +72,6 @@ run pool notificationApiSettings user notificationSettings withNotify =
   . runNotificationGatewayPort notificationApiSettings
   . runNotificationPort
   $ execute user notificationSettings withNotify
-
--- もっときれいにできる
-logError :: (MonadIO m, Show a) => a -> m ()
-logError e = runStdoutLoggingT $ logErrorN $ T.pack $ show e
 
 runUserPort :: Member UserGatewayPort.UserGatewayPort r => Sem (UserPort.UserPort : r) a -> Sem r a
 runUserPort = interpret \case

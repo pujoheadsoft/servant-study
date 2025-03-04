@@ -14,13 +14,9 @@ import Control.Exception (SomeException(..))
 import Control.Exception.Safe (catches)
 import qualified Control.Exception.Safe as Ex
 import Data.ByteString.Lazy.Char8 (pack)
-import qualified Data.Text as T
 import Database.Persist.Postgresql (runSqlPool, ConnectionPool, SqlBackend)
-import Control.Monad.IO.Class (liftIO, MonadIO)
+import Control.Monad.IO.Class (liftIO)
 import Architecture.Polysemy.Usecase.SaveUser (execute)
-
-import Control.Monad.Logger (logErrorN, runStdoutLoggingT)
-
 import Polysemy (runM, Member, Embed, Sem, embed)
 import Polysemy.Error (runError)
 import Control.Monad.Reader (ReaderT)
@@ -33,6 +29,7 @@ import qualified Architecture.Polysemy.Gateway.NotificationGatewayPort as Notifi
 import qualified Driver.UserDb.UserDriver as UserDriver
 import qualified Driver.Api.NotificationApiDriverReq as NotificationDriver
 import Api.Configuration (NotificationApiSettings)
+import Common.Logger (logError)
 
 handleSaveUserRequest :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> Handler String
 handleSaveUserRequest notificationApiSettings pool user notificationSettings withNotify = do
@@ -74,7 +71,3 @@ createNotificationGatewayPortFunctions
 createNotificationGatewayPortFunctions s = NotificationGatewayPort.NotificationGatewayPortFunctions
   { sendNotification = embed . NotificationDriver.postMessage s
   }
-
--- もっときれいにできる
-logError :: (MonadIO m, Show a) => a -> m ()
-logError e = runStdoutLoggingT $ logErrorN $ T.pack $ show e

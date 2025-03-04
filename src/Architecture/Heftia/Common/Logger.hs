@@ -1,4 +1,5 @@
-module Architecture.Hefty.Common.Logger where
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
+module Architecture.Heftia.Common.Logger (Logger(..), logInfo, logWarn, logError, runLogger) where
 
 import Control.Monad.Hefty (makeEffectF, type (:!!), type (~>), type (<|), interpret)
 import Control.Monad.Logger (runStdoutLoggingT, logErrorN, logWarnN, logInfoN)

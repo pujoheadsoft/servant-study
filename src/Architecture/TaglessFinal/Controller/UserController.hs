@@ -9,24 +9,21 @@ import Control.Exception (SomeException(..))
 import Control.Exception.Safe (catches)
 import qualified Control.Exception.Safe as Ex 
 import Data.ByteString.Lazy.Char8 (pack)
-import qualified Data.Text as T
 import Database.Persist.Postgresql (runSqlPool, ConnectionPool, SqlBackend)
-import Control.Monad.IO.Class (liftIO, MonadIO)
+import Control.Monad.IO.Class (liftIO)
 import Architecture.TaglessFinal.Usecase.SaveUser (execute)
-
-import Control.Monad.Logger (logErrorN, runStdoutLoggingT)
 import Control.Monad.Reader (ReaderT (runReaderT), MonadReader (ask))
 import qualified Architecture.TaglessFinal.Gateway.UserGateway as UserGateway
 import qualified Architecture.TaglessFinal.Gateway.UserGatewayPort as UserGatewayPort
 import qualified Architecture.TaglessFinal.Gateway.NotificationGateway as NotificationGateway
 import qualified Architecture.TaglessFinal.Gateway.NotificationGatewayPort as NotificationGatewayPort
-
 import qualified Architecture.TaglessFinal.Usecase.UserPort as UserPort
 import qualified Architecture.TaglessFinal.Usecase.NotificationPort as NotificationPort
 import qualified Driver.UserDb.UserDriver as UserDriver
 import qualified Driver.Api.NotificationApiDriverReq as NotificationDriver
 import Api.Configuration (NotificationApiSettings)
 import Control.Monad.Trans (lift)
+import Common.Logger (logError)
 
 handleSaveUserRequest
   :: NotificationApiSettings
@@ -83,7 +80,3 @@ data AppEnv = AppEnv {
 }
 
 type AppM = ReaderT AppEnv IO
-
--- もっときれいにできる
-logError :: (MonadIO m, Show a) => a -> m ()
-logError e = runStdoutLoggingT $ logErrorN $ T.pack $ show e

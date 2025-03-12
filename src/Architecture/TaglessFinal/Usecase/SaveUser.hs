@@ -1,6 +1,6 @@
 module Architecture.TaglessFinal.Usecase.SaveUser where
 
-import Domain.User (User(..), UserData (..), UnvalidatedUser(..), NotificationSettings, HasUserData(..), HasUserId(..), HasEmail(..), HasName(..), UserId)
+import Domain.User (User(..), UserData (..), UnvalidatedUser(..), UserProfile, HasUserData(..), HasUserId(..), HasEmail(..), HasName(..), UserId)
 import Domain.Email (makeEmail, HasValue(..))
 import Control.Lens ((^.))
 import Control.Exception.Safe (MonadThrow, Exception)
@@ -14,17 +14,17 @@ import Domain.Message (registeredUserMessage)
 execute
   :: (MonadThrow m, UserPort m, NotificationPort m)
   => UnvalidatedUser
-  -> NotificationSettings
+  -> UserProfile
   -> Bool
   -> m ()
-execute user notificationSettings withNotify = do
+execute user profile withNotify = do
   validEmail <- eitherThrow . makeEmail $ user ^. userData . email . value
   let
     userName = user ^. userData . name
     u = User (user ^. userId) (UserData userName validEmail)
 
   saveUser u
-  saveNotificationSettings u.userId notificationSettings
+  saveProfile u.userId profile
 
   when withNotify do
     sendNotification (registeredUserMessage u.userId userName)

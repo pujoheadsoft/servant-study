@@ -4,6 +4,5 @@ import Control.Monad.Hefty (makeEffectF)
 
 data UserPort a where
   SaveUser :: User -> UserPort ()
-  SaveNotificationSettings :: UserId -> NotificationSettings -> UserPort ()
-
+  SaveProfile :: UserId -> UserProfile -> UserPort ()
 makeEffectF [''UserPort]

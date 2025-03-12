@@ -1,6 +1,6 @@
 module Architecture.Simple.Controller.UserController where
 
-import Domain.User (UnvalidatedUser, NotificationSettings)
+import Domain.User (UnvalidatedUser, UserProfile)
 import Domain.Email (EmailError(InvalidEmailFormat))
 import Servant (Handler, ServerError (errBody), throwError, err400, err500)
 import Control.Exception (SomeException(..))
@@ -23,27 +23,27 @@ handleSaveUserRequest
   :: NotificationApiSettings
   -> ConnectionPool
   -> UnvalidatedUser
-  -> NotificationSettings
+  -> UserProfile
   -> Bool
   -> Handler String
-handleSaveUserRequest apiSetting pool user notificationSettings withNotify = do
+handleSaveUserRequest apiSetting pool user profile withNotify = do
   liftIO $ flip runSqlPool pool do
     let
       userGatewayPort = UserGateway.UserGatewayPort {
         saveUser = UserDriver.saveUser,
-        saveNotificationSettings = UserDriver.saveNotificationSettings
+        saveProfile = UserDriver.saveProfile
       }
       notificationGateway = NotificationGateway.NotificationGatewayPort {
         sendNotification = NotificationApiDriverWreq.postMessage apiSetting
       }
       userPort = UserPort {
         saveUser = UserGateway.saveUser userGatewayPort,
-        saveNotificationSettings = UserGateway.saveNotificationSettings userGatewayPort
+        saveProfile = UserGateway.saveProfile userGatewayPort
       }
       notificationPort = NotificationPort {
         sendNotification = NotificationGateway.sendNotification notificationGateway
       }
-    execute userPort notificationPort user notificationSettings withNotify
+    execute userPort notificationPort user profile withNotify
     pure "OK"
   `catches`
   [ Ex.Handler $ \(InvalidEmailFormat e) -> do

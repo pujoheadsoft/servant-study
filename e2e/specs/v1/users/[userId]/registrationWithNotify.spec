@@ -14,4 +14,4 @@
 * レスポンスボディが"OK"である
 * 通知先のAPIのパス"/notifications/userRegistered"にJSON<file:fixtures/v1/users/[userId]/registrationWithNotify/expected/notificationApi/request.json>でPOSTリクエストが送信された
 * "users"テーブルの内容が"fixtures/v1/users/[userId]/registrationWithNotify/expected/db"にあるCSVファイルの内容と一致する
-* "user_notifications"テーブルの内容が"fixtures/v1/users/[userId]/registrationWithNotify/expected/db"にあるCSVファイルの内容と一致する
+* "user_profiles"テーブルの内容が"fixtures/v1/users/[userId]/registrationWithNotify/expected/db"にあるCSVファイルの内容と一致する

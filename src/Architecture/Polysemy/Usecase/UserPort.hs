@@ -1,11 +1,11 @@
 module Architecture.Polysemy.Usecase.UserPort where
 
-import Domain.User (User(..), NotificationSettings, UserId)
+import Domain.User (User(..), UserProfile, UserId)
 import Polysemy (makeSem, Sem, interpret)
 
 data UserPort m a where
   SaveUser :: User -> UserPort m ()
-  SaveNotificationSettings :: UserId -> NotificationSettings -> UserPort m ()
+  SaveProfile :: UserId -> UserProfile -> UserPort m ()
 
 makeSem ''UserPort
 
@@ -14,10 +14,10 @@ makeSem ''UserPort
 -}
 data UserPortFunctions m = UserPortFunctions {
   saveUser :: User -> m (),
-  saveNotificationSettings :: UserId -> NotificationSettings -> m ()
+  saveProfile :: UserId -> UserProfile -> m ()
 }
 
 runUserPort :: UserPortFunctions (Sem r) -> Sem (UserPort : r) a -> Sem r a
 runUserPort f = interpret \case
   SaveUser user -> f.saveUser user
-  SaveNotificationSettings userId notification -> f.saveNotificationSettings userId notification
+  SaveProfile userId notification -> f.saveProfile userId notification

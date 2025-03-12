@@ -1,7 +1,7 @@
 module Architecture.Simple.Usecase.UserPort where
-import Domain.User (User, UserId, NotificationSettings)
+import Domain.User (User, UserId, UserProfile)
 
 data UserPort m = UserPort {
   saveUser :: User -> m (),
-  saveNotificationSettings :: UserId -> NotificationSettings -> m ()
+  saveProfile :: UserId -> UserProfile -> m ()
 }

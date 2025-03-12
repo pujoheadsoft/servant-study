@@ -11,3 +11,10 @@ CREATE TABLE user_notifications (
   push_notifications BOOLEAN DEFAULT true,
   PRIMARY KEY (user_id)
 );
+
+CREATE TABLE user_profiles (
+  user_id INT PRIMARY KEY,
+  bio TEXT,
+  age INT,
+  github_id VARCHAR
+);

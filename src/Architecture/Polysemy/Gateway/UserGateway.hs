@@ -4,7 +4,7 @@ module Architecture.Polysemy.Gateway.UserGateway where
 import Data.Text (pack)
 import Domain.Email (Email(value))
 import qualified Driver.UserDb.Schema as S
-import Domain.User (User(..), UserId(..), UserData(UserData), UserName (UserName), NotificationSettings (..))
+import Domain.User (User(..), UserId(..), UserData(UserData), UserName (UserName), UserProfile (..))
 import qualified Architecture.Polysemy.Gateway.UserGatewayPort as Port
 import Prelude hiding (last)
 import Polysemy (Member, Sem)
@@ -15,14 +15,14 @@ saveUser (User (UserId userId) (UserData (UserName first last) email)) = do
   let u = S.User (fromIntegral userId) first last (pack email.value)
   Port.saveUser u
 
-saveNotificationSettings :: (Member Port.UserGatewayPort r) => UserId -> NotificationSettings -> Sem r ()
-saveNotificationSettings (UserId userId) (NotificationSettings email push) = do
-  let n = S.UserNotification (fromIntegral userId) email push
-  Port.saveNotificationSettings n
+saveProfile :: (Member Port.UserGatewayPort r) => UserId -> UserProfile -> Sem r ()
+saveProfile (UserId userId)  (UserProfile bio age githubId) = do
+  let p = S.UserProfile (fromIntegral userId) bio (fromIntegral age) githubId
+  Port.saveProfile p
 
 createUserPortFunctions :: (Member Port.UserGatewayPort r) => UserPortFunctions (Sem r)
 createUserPortFunctions = UserPortFunctions {
   saveUser = saveUser,
-  saveNotificationSettings = saveNotificationSettings
+  saveProfile = saveProfile
 }
 

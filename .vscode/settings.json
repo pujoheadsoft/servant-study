@@ -3,5 +3,7 @@
     "*.spec": "gauge",
     "*.cpt": "gauge"
   },
-  "java.configuration.updateBuildConfiguration": "automatic"
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 500
 }

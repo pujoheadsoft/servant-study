@@ -1,6 +1,6 @@
 module Architecture.Heftia.Usecase.SaveUser where
 
-import Domain.User (User(..), UserData (..), UnvalidatedUser(..), NotificationSettings, HasUserData(..), HasUserId(..), HasEmail(..), HasName(..), UserId)
+import Domain.User (User(..), UserData (..), UnvalidatedUser(..), UserProfile, HasUserData(..), HasUserId(..), HasEmail(..), HasName(..), UserId)
 import Domain.Email (makeEmail, HasValue(..), EmailError)
 import Control.Lens ((^.))
 import Control.Arrow ((|||))
@@ -13,15 +13,15 @@ import Domain.Message (registeredUserMessage)
 
 execute
   :: (UserPort <: m, NotificationPort <: m, Throw EmailError <: m, Monad m)
-  => UnvalidatedUser -> NotificationSettings -> Bool -> m ()
-execute user notificationSettings withNotify = do
+  => UnvalidatedUser -> UserProfile -> Bool -> m ()
+execute user profile withNotify = do
   validEmail <- eitherThrow . makeEmail $ user ^. userData . email . value
   let
     userName = user ^. userData . name
     u = User (user ^. userId) (UserData userName validEmail)
 
   saveUser u
-  saveNotificationSettings u.userId notificationSettings
+  saveProfile u.userId profile
 
   when withNotify do
     sendNotification (registeredUserMessage u.userId userName)

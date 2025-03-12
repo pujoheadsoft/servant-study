@@ -26,11 +26,12 @@ data UnvalidatedUserData = UnvalidatedUserData
   } deriving (Eq, Show)
 makeFieldsId ''UnvalidatedUserData
 
-data NotificationSettings = NotificationSettings
-  { email :: Bool
-  , push  :: Bool
+data UserProfile = UserProfile
+  { bio :: Text
+  , age :: Int
+  , githubId :: Text
   } deriving (Eq, Show)
-makeFieldsId ''NotificationSettings
+makeFieldsId ''UserProfile
 
 -- 新規ユーザー(検証済み)
 type ValidatedNewUser = UserData

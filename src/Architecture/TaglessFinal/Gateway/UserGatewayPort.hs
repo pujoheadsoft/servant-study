@@ -1,7 +1,7 @@
 module Architecture.TaglessFinal.Gateway.UserGatewayPort where
 
-import Driver.UserDb.Schema (User, UserNotification)
+import Driver.UserDb.Schema (User, UserProfile)
 
 class Monad m => UserGatewayPort m where
   saveUser :: User -> m ()
-  saveNotificationSettings :: UserNotification -> m ()
+  saveProfile :: UserProfile -> m ()

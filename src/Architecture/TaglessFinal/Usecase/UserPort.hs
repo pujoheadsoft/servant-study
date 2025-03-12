@@ -3,4 +3,4 @@ import Domain.User
 
 class Monad m => UserPort m where
   saveUser :: User -> m ()
-  saveNotificationSettings :: UserId -> NotificationSettings -> m ()
+  saveProfile :: UserId -> UserProfile -> m ()

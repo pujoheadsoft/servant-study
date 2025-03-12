@@ -4,8 +4,9 @@
     "last": "名無しの"
   },
   "email": "gonbe.nanashino@anonymouse.com",
-  "notifications": {
-    "email": true,
-    "push": false
+  "profile": {
+    "bio": "I like cats",
+    "age": 30,
+    "githubId": "nanashi"
   }
 }

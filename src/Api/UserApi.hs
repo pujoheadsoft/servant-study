@@ -7,7 +7,7 @@ module Api.UserApi where
 import Servant
 import Data.Aeson
 import Data.Aeson.TH
-import Domain.User (UnvalidatedUser(..), UnvalidatedUserData (..), UserName (..), UserId (UserId), NotificationSettings (..))
+import Domain.User (UnvalidatedUser(..), UnvalidatedUserData (..), UserName (..), UserId (UserId), UserProfile (..))
 import Domain.Email (UnvalidatedEmail(UnvalidatedEmail))
 import GHC.Generics (Generic)
 import Database.Persist.Postgresql (ConnectionPool)
@@ -48,14 +48,14 @@ putUser :: ApiSettings -> ConnectionPool -> Integer -> Maybe Architecture -> May
 putUser apiSettings pool userId architecture _withNotify request = do
   let 
     user = toUnvalidatedUser userId request
-    notificationSettings = toNotificationSettings request
+    profile = toProfile request
     withNotify = fromMaybe False _withNotify
 
   case architecture of
-    Just Simple -> Simple.handleSaveUserRequest apiSettings.notification pool user notificationSettings withNotify
-    Just TaglessFinal -> TaglessFinal.handleSaveUserRequest apiSettings.notification pool user notificationSettings withNotify
-    Just Polysemy -> Polysemy3.handleSaveUserRequest apiSettings.notification pool user notificationSettings withNotify
-    Just Heftia -> Heftia2.handleSaveUserRequest apiSettings.notification pool user notificationSettings withNotify
+    Just Simple -> Simple.handleSaveUserRequest apiSettings.notification pool user profile withNotify
+    Just TaglessFinal -> TaglessFinal.handleSaveUserRequest apiSettings.notification pool user profile withNotify
+    Just Polysemy -> Polysemy3.handleSaveUserRequest apiSettings.notification pool user profile withNotify
+    Just Heftia -> Heftia2.handleSaveUserRequest apiSettings.notification pool user profile withNotify
     Nothing -> throw $ err400 { errBody = "Missing architecture query parameter" }
 
 
@@ -71,16 +71,17 @@ toUnvalidatedUser userId request = UnvalidatedUser
     }
   }
 
-toNotificationSettings :: UserRequest -> NotificationSettings
-toNotificationSettings request = NotificationSettings
-  { email = request.notifications.email
-  , push = request.notifications.push
+toProfile :: UserRequest -> UserProfile
+toProfile request = UserProfile
+  { bio = request.profile.bio
+  , age = request.profile.age
+  , githubId = request.profile.githubId
   }
 
 data UserRequest = UserRequest
   { name          :: UserNameRequest
   , email         :: String
-  , notifications :: NotificationRequest
+  , profile       :: UserProfileRequest
   } deriving (Eq, Show, Generic)
 
 data UserNameRequest = UserNameRequest
@@ -88,12 +89,13 @@ data UserNameRequest = UserNameRequest
   , last  :: Text
   } deriving (Eq, Show, Generic)
 
-data NotificationRequest = NotificationRequest
-  { email :: Bool
-  , push  :: Bool
+data UserProfileRequest = UserProfileRequest
+  { bio :: Text
+  , age :: Int
+  , githubId :: Text
   } deriving (Eq, Show, Generic)
 
-instance FromJSON NotificationRequest
+instance FromJSON UserProfileRequest
 instance FromJSON UserNameRequest
 instance FromJSON UserRequest
 

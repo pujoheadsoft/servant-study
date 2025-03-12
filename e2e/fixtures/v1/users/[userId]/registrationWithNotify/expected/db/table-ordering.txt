@@ -1,2 +1,2 @@
 users
-user_notifications
+user_profiles

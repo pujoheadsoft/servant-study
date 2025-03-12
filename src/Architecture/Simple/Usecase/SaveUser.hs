@@ -1,6 +1,6 @@
 module Architecture.Simple.Usecase.SaveUser where
 
-import Domain.User (User(..), UserData (..), UnvalidatedUser(..), NotificationSettings, HasUserData(..), HasUserId(..), HasEmail(..), HasName(..), UserName (..))
+import Domain.User (User(..), UserData (..), UnvalidatedUser(..), UserProfile, HasUserData(..), HasUserId(..), HasEmail(..), HasName(..), UserName (..))
 import Domain.Email (makeEmail, HasValue(..))
 import Control.Lens ((^.))
 import Control.Exception.Safe (MonadThrow, Exception)
@@ -19,17 +19,17 @@ execute
   => UserPort m
   -> NotificationPort m
   -> UnvalidatedUser
-  -> NotificationSettings
+  -> UserProfile
   -> Bool
   -> m ()
-execute userPort notificationPort user notificationSettings withNotify = do
+execute userPort notificationPort user profile withNotify = do
   validEmail <- eitherThrow . makeEmail $ user ^. userData . email . value
   let
     userName = user ^. userData . name
     u = User (user ^. userId) (UserData userName validEmail)
 
   userPort.saveUser u
-  userPort.saveNotificationSettings u.userId notificationSettings
+  userPort.saveProfile u.userId profile
 
   when withNotify do
     notificationPort.sendNotification (registeredUserMessage u.userId userName)

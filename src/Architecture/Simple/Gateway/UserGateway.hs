@@ -3,20 +3,19 @@ module Architecture.Simple.Gateway.UserGateway where
 import Data.Text (pack)
 import Domain.Email (Email(value))
 import qualified Driver.UserDb.Schema as S
-import Domain.User (User(..), UserId(..), UserData(UserData), UserName (UserName), NotificationSettings (..))
-import Control.Exception.Safe (MonadThrow)
+import Domain.User (User(..), UserId(..), UserData(UserData), UserName (UserName), UserProfile (..))
 
-saveUser :: (MonadThrow m) => UserGatewayPort m -> User -> m ()
+saveUser :: UserGatewayPort m -> User -> m ()
 saveUser port (User (UserId userId) (UserData (UserName first last) email)) = do
   let u = S.User (fromIntegral userId) first last (pack email.value)
   port.saveUser u
 
-saveNotificationSettings :: (MonadThrow m) => UserGatewayPort m -> UserId -> NotificationSettings -> m ()
-saveNotificationSettings port (UserId userId) (NotificationSettings email push) = do
-  let n = S.UserNotification (fromIntegral userId) email push
-  port.saveNotificationSettings n
+saveProfile :: UserGatewayPort m -> UserId -> UserProfile -> m ()
+saveProfile port (UserId userId) (UserProfile bio age githubId) = do
+  let p = S.UserProfile (fromIntegral userId) bio (fromIntegral age) githubId
+  port.saveProfile p
 
 data UserGatewayPort m = UserGatewayPort {
   saveUser :: S.User -> m (),
-  saveNotificationSettings :: S.UserNotification -> m ()
+  saveProfile :: S.UserProfile -> m ()
 }

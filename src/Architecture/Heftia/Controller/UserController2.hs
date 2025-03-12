@@ -4,7 +4,7 @@
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 module Architecture.Heftia.Controller.UserController2 where
 
-import Domain.User (UnvalidatedUser, NotificationSettings)
+import Domain.User (UnvalidatedUser, UserProfile)
 import Domain.Email (EmailError(InvalidEmailFormat))
 import Servant (Handler, ServerError (errBody), throwError, err400, err500)
 import Control.Exception (SomeException(..))
@@ -37,11 +37,11 @@ handleSaveUserRequest
   :: NotificationApiSettings
   -> ConnectionPool
   -> UnvalidatedUser
-  -> NotificationSettings
+  -> UserProfile
   -> Bool
   -> Handler String
-handleSaveUserRequest apiSetting pool user notificationSettings withNotify = do
-  liftIO $ run apiSetting pool user notificationSettings withNotify >>= either
+handleSaveUserRequest apiSetting pool user profile withNotify = do
+  liftIO $ run apiSetting pool user profile withNotify >>= either
     Ex.throw -- 外側のハンドラに任せる
     (const $ pure "OK")
   `catches`
@@ -58,22 +58,22 @@ run
   => NotificationApiSettings
   -> ConnectionPool
   -> UnvalidatedUser
-  -> NotificationSettings
+  -> UserProfile
   -> Bool
   -> m (Either EmailError ())
-run apiSetting pool user notification withNotify  = do
+run apiSetting pool user profile withNotify  = do
     runEffPoolSqlWithTransaction pool
   . runThrow @EmailError  
   . runGatewayPort
   . runUserPort
   . runNotificationGatewayPort apiSetting
   . runNotificationPort
-  $ execute user notification withNotify
+  $ execute user profile withNotify
 
 runUserPort :: (UserGatewayPort.UserGatewayPort <| r) => eh :!! UserPort.UserPort ': r ~> eh :!! r
 runUserPort = interpret \case
   UserPort.SaveUser user -> UserGateway.saveUser user
-  UserPort.SaveNotificationSettings userId notification -> UserGateway.saveNotificationSettings userId notification
+  UserPort.SaveProfile userId profile -> UserGateway.saveProfile userId profile
 
 runNotificationPort
   :: (NotificationGatewayPort.NotificationGatewayPort <| r)
@@ -87,7 +87,7 @@ runGatewayPort = translate go
     go :: UserGatewayPort.UserGatewayPort a -> RunSql a
     go = \case
       UserGatewayPort.SaveUser user -> RunSql $ UserDriver.saveUser @IO user
-      UserGatewayPort.SaveNotificationSettings notification -> RunSql $ UserDriver.saveNotificationSettings @IO notification
+      UserGatewayPort.SaveProfile profile -> RunSql $ UserDriver.saveProfile @IO profile
 
 runNotificationGatewayPort
   :: RunSql <| ef

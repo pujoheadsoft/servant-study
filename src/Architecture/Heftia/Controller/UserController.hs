@@ -2,7 +2,7 @@
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 module Architecture.Heftia.Controller.UserController where
 
-import Domain.User (UnvalidatedUser, NotificationSettings)
+import Domain.User (UnvalidatedUser, UserProfile)
 import Domain.Email (EmailError(InvalidEmailFormat))
 import Servant (Handler, ServerError (errBody), throwError, err400, err500)
 import Control.Exception (SomeException(..))
@@ -26,10 +26,10 @@ import Control.Monad.Hefty.Except (runThrow)
 import Api.Configuration (NotificationApiSettings)
 import Common.Logger (logError)
 
-handleSaveUserRequest :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> Handler String
-handleSaveUserRequest apiSetting pool user notificationSettings withNotify = do
+handleSaveUserRequest :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> UserProfile -> Bool -> Handler String
+handleSaveUserRequest apiSetting pool user profile withNotify = do
   liftIO $ flip runSqlPool pool do
-    run apiSetting user notificationSettings withNotify >>= either
+    run apiSetting user profile withNotify >>= either
       Ex.throw -- 外側のハンドラに任せる
       \_ -> pure "OK"
   `catches`
@@ -41,20 +41,20 @@ handleSaveUserRequest apiSetting pool user notificationSettings withNotify = do
     throwError $ err500 { errBody = pack $ show e }
   ]
 
-run :: NotificationApiSettings -> UnvalidatedUser -> NotificationSettings -> Bool -> ReaderT SqlBackend IO (Either EmailError ())
-run apiSetting user notificationSettings withNotify =
+run :: NotificationApiSettings -> UnvalidatedUser -> UserProfile -> Bool -> ReaderT SqlBackend IO (Either EmailError ())
+run apiSetting user profile withNotify =
   runEff
   . runThrow
   . runUserGatewayPort
   . runUserPort
   . runNotificationGatewayPort apiSetting
   . runNotificationPort
-  $ execute user notificationSettings withNotify
+  $ execute user profile withNotify
 
 runUserPort :: (UserGatewayPort.UserGatewayPort <| r) => eh :!! UserPort.UserPort ': r ~> eh :!! r
 runUserPort = interpret \case
   UserPort.SaveUser user -> UserGateway.saveUser user
-  UserPort.SaveNotificationSettings userId notification -> UserGateway.saveNotificationSettings userId notification
+  UserPort.SaveProfile userId notification -> UserGateway.saveProfile userId notification
 
 runNotificationPort
   :: (NotificationGatewayPort.NotificationGatewayPort <| r)
@@ -65,7 +65,7 @@ runNotificationPort = interpret \case
 runUserGatewayPort :: (ReaderT SqlBackend IO <| r) => eh :!! UserGatewayPort.UserGatewayPort ': r ~> eh :!! r
 runUserGatewayPort = interpret \case
   UserGatewayPort.SaveUser user -> send $ UserDriver.saveUser @IO user
-  UserGatewayPort.SaveNotificationSettings notification -> send $ UserDriver.saveNotificationSettings @IO notification
+  UserGatewayPort.SaveProfile notification -> send $ UserDriver.saveProfile @IO notification
 
 runNotificationGatewayPort
   :: (ReaderT SqlBackend IO <| r)

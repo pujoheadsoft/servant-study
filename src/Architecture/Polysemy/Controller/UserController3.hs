@@ -26,7 +26,7 @@ import Data.Typeable
 import Database.Persist.Postgresql (SqlBackend, runSqlPool)
 import Database.Persist.Sql (ConnectionPool)
 import Domain.Email (EmailError (InvalidEmailFormat))
-import Domain.User (NotificationSettings, UnvalidatedUser)
+import Domain.User (UserProfile, UnvalidatedUser)
 import Driver.Api.NotificationApiDriverReq qualified as NotificationDriver
 import Driver.UserDb.UserDriver qualified as UserDriver
 import Polysemy (Embed, Member, Sem, embed, interpret, makeSem, reinterpret, runM)
@@ -50,11 +50,11 @@ runPoolSql pool sem = do
   liftIO $ putStrLn "トランザクション終了"
   embed x
 
-handleSaveUserRequest :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> NotificationSettings -> Bool -> Handler String
-handleSaveUserRequest notificationApiSettings pool user notificationSettings withNotify =
+handleSaveUserRequest :: NotificationApiSettings -> ConnectionPool -> UnvalidatedUser -> UserProfile -> Bool -> Handler String
+handleSaveUserRequest notificationApiSettings pool user profile withNotify =
   do
     liftIO $
-      run pool notificationApiSettings user notificationSettings withNotify
+      run pool notificationApiSettings user profile withNotify
         >>= either
           Ex.throw -- 外側のハンドラに任せる
           (const $ pure "OK")
@@ -66,8 +66,8 @@ handleSaveUserRequest notificationApiSettings pool user notificationSettings wit
                   throwError $ err500 {errBody = pack $ show e}
               ]
 
-run :: ConnectionPool -> NotificationApiSettings -> UnvalidatedUser -> NotificationSettings -> Bool -> IO (Either EmailError ())
-run pool notificationApiSettings user notificationSettings withNotify =
+run :: ConnectionPool -> NotificationApiSettings -> UnvalidatedUser -> UserProfile -> Bool -> IO (Either EmailError ())
+run pool notificationApiSettings user profile withNotify =
   runM
     . runPoolSql pool
     . runError
@@ -75,12 +75,12 @@ run pool notificationApiSettings user notificationSettings withNotify =
     . runUserPort
     . runNotificationGatewayPort notificationApiSettings
     . runNotificationPort
-    $ execute user notificationSettings withNotify
+    $ execute user profile withNotify
 
 runUserPort :: (Member UserGatewayPort.UserGatewayPort r) => Sem (UserPort.UserPort : r) a -> Sem r a
 runUserPort = interpret \case
   UserPort.SaveUser user -> UserGateway.saveUser user
-  UserPort.SaveNotificationSettings userId notification -> UserGateway.saveNotificationSettings userId notification
+  UserPort.SaveProfile userId notification -> UserGateway.saveProfile userId notification
 
 runNotificationPort :: (Member NotificationGatewayPort.NotificationGatewayPort r) => Sem (NotificationPort.NotificationPort : r) a -> Sem r a
 runNotificationPort = interpret \case
@@ -92,7 +92,7 @@ runUserGatewayPort ::
   Sem r a
 runUserGatewayPort = interpret \case
   UserGatewayPort.SaveUser user -> runDB $ UserDriver.saveUser user
-  UserGatewayPort.SaveNotificationSettings notification -> runDB $ UserDriver.saveNotificationSettings notification
+  UserGatewayPort.SaveProfile notification -> runDB $ UserDriver.saveProfile notification
 
 runNotificationGatewayPort ::
   (Member DB r) =>

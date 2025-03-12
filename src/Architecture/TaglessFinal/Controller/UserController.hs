@@ -2,7 +2,7 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 module Architecture.TaglessFinal.Controller.UserController where
 
-import Domain.User (UnvalidatedUser, NotificationSettings)
+import Domain.User (UnvalidatedUser, UserProfile)
 import Domain.Email (EmailError(InvalidEmailFormat))
 import Servant (Handler, ServerError (errBody), throwError, err400, err500)
 import Control.Exception (SomeException(..))
@@ -29,15 +29,15 @@ handleSaveUserRequest
   :: NotificationApiSettings
   -> ConnectionPool
   -> UnvalidatedUser
-  -> NotificationSettings
+  -> UserProfile
   -> Bool
   -> Handler String
-handleSaveUserRequest notificationApiSettings pool user notificationSettings withNotify = do
+handleSaveUserRequest notificationApiSettings pool user profile withNotify = do
   liftIO $ flip runSqlPool pool do
     sqlBackEnd <- ask
      
     runApp
-      (execute user notificationSettings withNotify)
+      (execute user profile withNotify)
       AppEnv {sqlBackEnd = sqlBackEnd, notificationApiSettings = notificationApiSettings }
 
     pure "OK"
@@ -55,7 +55,7 @@ runApp app env = liftIO $ runReaderT app env
 
 instance UserPort.UserPort AppM where
   saveUser = UserGateway.saveUser
-  saveNotificationSettings = UserGateway.saveNotificationSettings
+  saveProfile = UserGateway.saveProfile
 
 instance NotificationPort.NotificationPort AppM where
   sendNotification = NotificationGateway.sendNotification
@@ -65,9 +65,9 @@ instance UserGatewayPort.UserGatewayPort AppM where
     env <- ask
     lift $ runReaderT (UserDriver.saveUser user) env.sqlBackEnd
     
-  saveNotificationSettings userNotification = do
+  saveProfile userNotification = do
     env <- ask
-    lift $ runReaderT (UserDriver.saveNotificationSettings userNotification) env.sqlBackEnd
+    lift $ runReaderT (UserDriver.saveProfile userNotification) env.sqlBackEnd
 
 instance NotificationGatewayPort.NotificationGatewayPort AppM where
   sendNotification message = do

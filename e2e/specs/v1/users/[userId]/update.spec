@@ -12,4 +12,4 @@
 * レスポンスのステータスコードが"200"である
 * レスポンスボディが"OK"である
 * "users"テーブルの内容が"fixtures/v1/users/[userId]/update/expected"にあるCSVファイルの内容と一致する
-* "user_notifications"テーブルの内容が"fixtures/v1/users/[userId]/update/expected"にあるCSVファイルの内容と一致する
+* "user_profiles"テーブルの内容が"fixtures/v1/users/[userId]/update/expected"にあるCSVファイルの内容と一致する

@@ -22,10 +22,11 @@ User sql=users
   Primary userId
   deriving Show Eq
 
-UserNotification sql=user_notifications
+UserProfile sql=user_profiles
   userId Int32
-  emailNotifications Bool
-  pushNotifications Bool
+  bio Text
+  age Int32
+  githubId Text
   Primary userId
   deriving Show Eq
 |]
